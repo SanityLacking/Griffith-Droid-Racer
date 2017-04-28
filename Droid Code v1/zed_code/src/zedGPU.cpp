@@ -1,0 +1,98 @@
+#include "zedGPU.h"
+
+//standard include
+#include <stdio.h>
+#include <string.h>
+
+//ZED include
+#include <zed/Mat.hpp>
+#include <zed/Camera.hpp>
+#include <zed/utils/GlobalDefine.hpp>
+
+//OpenCV include
+#include "opencv2/core/core.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+
+
+// Cuda functions include
+#include "kernel.cuh"
+
+using namespace sl::zed;
+using namespace cv;
+using namespace std;
+
+zedGPU::zedGPU(Camera* zed){
+	 // get the focale and the baseline of the zed
+	 fx = zed->getParameters()->RightCam.fx; // here we work with the right camera
+	 baseline = zed->getParameters()->baseline;
+
+	 width = zed->getImageSize().width;
+	 height = zed->getImageSize().height;
+
+	 // create and alloc GPU memory for the disparity matrix
+	disparityRightGPU;
+	disparityRightGPU.data = (unsigned char*) nppiMalloc_32f_C1(width, height, &disparityRightGPU.step);
+	disparityRightGPU.setUp(width, height, 1, sl::zed::FLOAT, GPU);
+
+	// create and alloc GPU memory for the depth matrix
+	depthRightGPU;
+	depthRightGPU.data = (unsigned char*) nppiMalloc_32f_C1(width, height, &depthRightGPU.step);
+	depthRightGPU.setUp(width, height, 1, sl::zed::FLOAT, GPU);
+
+	// create and alloc GPU memory for the image matrix
+	imageDisplayGPU;
+	imageDisplayGPU.data = (unsigned char*) nppiMalloc_8u_C4(width, height, &imageDisplayGPU.step);
+	imageDisplayGPU.setUp(width, height, 4, sl::zed::UCHAR, GPU);
+   
+	// create a CPU image for display purpose
+	//imageDisplay(height, width, CV_8UC4);
+	//frame(height, width, CV_8UC4);
+	
+	
+	depthMax = 6.; //Meter
+	depthMaxAsChanged = true;
+
+	
+}
+
+
+		
+void zedGPU::getFrame(Camera* zed, cv::Mat& outputD, cv::Mat& outputC){ // do all the gpu code in this file
+	// Grab the current images and compute the disparity
+	bool res = zed->grab(RAW, 0, 1);
+	// get the right image
+	// !! WARNING !! this is not a copy, here we work with the data allocated by the zed object
+	// this can be done ONLY if we call ONE time this methode before the next grab, make a copy if you want to get multiple IMAGE
+	sl::zed::Mat imageRightGPU = zed->getView_gpu(STEREO_RIGHT);
+	
+	// copy view for color detection.
+	cudaMemcpy2D((uchar*) outputC.data, outputC.step, (Npp8u*) imageRightGPU.data, imageRightGPU.step, imageRightGPU.getWidthByte(), imageRightGPU.height, cudaMemcpyDeviceToHost);
+
+
+	// get the disparity
+	// !! WARNING !! this is not a copy, here we work with the data allocated by the zed object
+	// this can be done ONLY if we call ONE time this methode before the next grab, make a copy if you want to get multiple MEASURE
+	
+	sl::zed::Mat disparityGPU = zed->retrieveMeasure_gpu(DISPARITY);
+
+	//  Call the cuda function that convert the disparity from left to right
+	cuConvertDisparityLeft2Right(disparityGPU, disparityRightGPU);
+
+	// Call the cuda function that convert disparity to depth
+	cuConvertDisparity2Depth(disparityRightGPU, depthRightGPU, fx, baseline);
+
+    //cudaMemcpy2D((uchar*) outputD.data, outputD.step, (Npp8u*) depthRightGPU.data, depthRightGPU.step, depthRightGPU.getWidthByte(), depthRightGPU.height, cudaMemcpyDeviceToHost);
+
+	// Call the cuda function that convert depth to color and merge it with the current right image
+	cuOverlayImageAndDepth(depthRightGPU, imageRightGPU, imageDisplayGPU, depthMax);
+
+	// Copy the processed image frome the GPU to the CPU for display
+	cudaMemcpy2D((uchar*) outputD.data, outputD.step, (Npp8u*) imageDisplayGPU.data, imageDisplayGPU.step, imageDisplayGPU.getWidthByte(), imageDisplayGPU.height, cudaMemcpyDeviceToHost);
+   
+}
+		  
+
+
+
+

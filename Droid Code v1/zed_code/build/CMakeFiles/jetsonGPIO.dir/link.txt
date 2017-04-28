@@ -1,0 +1,2 @@
+/usr/bin/ar qc libjetsonGPIO.a  CMakeFiles/jetsonGPIO.dir/src/jetsonGPIO.o
+/usr/bin/ranlib libjetsonGPIO.a

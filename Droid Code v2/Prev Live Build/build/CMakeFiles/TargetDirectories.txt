@@ -1,0 +1,3 @@
+/home/ubuntu/Desktop/lanefollowingnew/zed_code/build/CMakeFiles/edit_cache.dir
+/home/ubuntu/Desktop/lanefollowingnew/zed_code/build/CMakeFiles/rebuild_cache.dir
+/home/ubuntu/Desktop/lanefollowingnew/zed_code/build/CMakeFiles/hermes.dir
