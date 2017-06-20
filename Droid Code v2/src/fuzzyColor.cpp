@@ -1,15 +1,22 @@
+/*
+	fuzzyColor.cpp
+
+	Color dection method that uses the fuzzy color functionality.
+	
+	Initial developed by Prof Napelon to use fuzzy logic in the detection of the color.
+	Updated and refactored to use a factory class to build the color classifier.
+		
+*/
+
 #include "stdafx.h"
 #include "fuzzyColor.h"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/opencv.hpp"
-
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "colorClassifierFactory.hpp"
-
 
 using namespace std;
 using namespace cv;
