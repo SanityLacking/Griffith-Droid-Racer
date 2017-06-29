@@ -27,6 +27,11 @@ $RECYCLE.BIN/
 *.sln
 *.sdf
 *.opensdf
+*.props
+*.VC.db
+*.VC.opendb
+*/screenshots/*
+*.obj.enc
 
 # =========================
 # Operating System Files
