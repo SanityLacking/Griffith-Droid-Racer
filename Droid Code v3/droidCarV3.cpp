@@ -13,6 +13,7 @@
 #include <iostream>
 #include <conio.h>
 #include "UDPClient.h"
+#include <sstream>
 //#include "socketReceive.hpp"
 
 #include "fuzzyColor.h"
@@ -25,6 +26,11 @@ using namespace std;
 char *addr = "127.0.0.1";
 int UDPMAX = 65507;
 int port = 5000;
+
+char *returnAddr = "192.168.0.109";
+int returnPort = 5001;
+
+UDPClient *returnClient = new UDPClient(returnAddr, returnPort);
 
 struct Directions {
 	int speed = 0;
@@ -61,7 +67,7 @@ int processDirections(Directions& D);
 vector<Point> findPoints(vector<vector<Point> > contours, Point midPoint);
 Point intersection(vector<Point> contour, Point midPoint);
 vector<Point>  contourBounds(vector<vector<Point> >& contours, Mat& input);
-
+void emitDirections(Directions& d);
 FuzzyColor fuzzyColor;
 Size frameSize;
 
@@ -108,12 +114,12 @@ int main(int argc, char** argv)
 int processVideo() {
 	cout << "=== VIDEO RECEIVER ===" << endl;
 
-	//setup UDP client
+	//setup UDP client for recieving
 	UDPClient *client = new UDPClient(port);
 	char *buff = (char*)malloc(UDPMAX);
 
-	//setup openCV
-	cvNamedWindow("UDP Video Receiver", CV_WINDOW_AUTOSIZE);
+
+
 	vector<uchar> videoBuffer;
 
 	while (1){
@@ -133,7 +139,9 @@ int processVideo() {
 		IplImage img = jpegimage;
 		cvShowImage("UDP Video Receiver", &img);
 		processImage(jpegimage);
-		cvWaitKey(5);
+
+
+		waitKey(1);
 	}
 	return 0;
 }
@@ -323,6 +331,7 @@ void laneDetect(Mat& input, Directions& D) {
 	D.angle = 75;
 	D.speed = 100;
 
+	emitDirections(D);
 }
 
 /* Process the determined directions and send them to the motor
@@ -664,3 +673,20 @@ double leastSqrRegression(vector<Point> xyCollection){
 	return Rsqr;
 }
 
+/*
+send the directions determined by the processor back to the pi.
+The returnClient is defined at the start of the program.
+TODO add the client it is supposed to use to this function to make it more independant.
+*/
+void emitDirections(Directions& D){
+	std::ostringstream oss;
+	oss << D.angle << ":" << D.speed;
+	string message = oss.str();
+	std::vector<uchar> buff(message.c_str(), message.c_str() + message.length() + 1);
+	int returnResult = returnClient->sendData((char*)(&buff[0]), buff.size());
+	if (returnResult < 0)
+		cout << "Failed to send." << endl;
+	else
+		cout << "Sent a frame of size " << returnResult << endl;
+
+}
