@@ -1,0 +1,69 @@
+# depslib dependency file v1.0
+1498901141 source:/home/pi/c++/SocketVideo/SocketVideo/main.cpp
+	"opencv2/objdetect/objdetect.hpp"
+	"opencv2/highgui/highgui.hpp"
+	"opencv2/imgproc/imgproc.hpp"
+	"opencv2/video/tracking.hpp"
+	<iostream>
+	"protocols/basic_protocol.h"
+	"sender/sender_socket.h"
+	"util/util.h"
+	"video/video_capture.h"
+
+1498892489 /home/pi/c++/SocketVideo/SocketVideo/protocols/basic_protocol.h
+	<vector>
+	"protocol.h"
+	"../video/video_frame.h"
+
+1497447037 /home/pi/c++/SocketVideo/SocketVideo/sender/sender_socket.h
+	<arpa/inet.h>
+	<string>
+	<vector>
+
+1497447037 /home/pi/c++/SocketVideo/SocketVideo/util/util.h
+	<vector>
+
+1498892502 /home/pi/c++/SocketVideo/SocketVideo/video/video_capture.h
+	<string>
+	"video_frame.h"
+	"opencv2/core/core.hpp"
+	"opencv2/opencv.hpp"
+
+1497447037 source:/home/pi/c++/SocketVideo/SocketVideo/sender/sender_socket.cpp
+	"sender/sender_socket.h"
+	<arpa/inet.h>
+	<sys/socket.h>
+	<iostream>
+	<string>
+	<vector>
+
+1497447037 source:/home/pi/c++/SocketVideo/SocketVideo/protocols/basic_protocol.cpp
+	"protocols/basic_protocol.h"
+	<vector>
+
+1498885283 source:/home/pi/c++/SocketVideo/SocketVideo/video/video_capture.cpp
+	"video/video_capture.h"
+	<iostream>
+	<vector>
+	"opencv2/core/core.hpp"
+	"opencv2/highgui/highgui.hpp"
+
+1497447037 source:/home/pi/c++/SocketVideo/SocketVideo/video/video_frame.cpp
+	"video/video_frame.h"
+	<string>
+	<vector>
+	"opencv2/core/core.hpp"
+	"opencv2/highgui/highgui.hpp"
+
+1497447037 source:/home/pi/c++/SocketVideo/SocketVideo/util/util.cpp
+	"util/util.h"
+	<iostream>
+	<sstream>
+
+1497447037 /home/pi/c++/SocketVideo/SocketVideo/protocols/protocol.h
+	<vector>
+
+1497447037 /home/pi/c++/SocketVideo/SocketVideo/video/video_frame.h
+	<vector>
+	"opencv2/core/core.hpp"
+
