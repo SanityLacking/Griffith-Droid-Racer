@@ -8,6 +8,14 @@
 #include <iostream>
 #include <numeric>
 
+
+// Maths!
+#define _USE_MATH_DEFINES // for C++  
+#include <cmath>  
+#define _USE_MATH_DEFINES // for C  
+#include <math.h>  
+
+
 //socket file
 #define CV_H
 #include <iostream>
@@ -56,6 +64,15 @@ public:
 		hxBound = hxB;
 	}
 };
+
+
+// Ryoma's Functions
+int convertTurningAngle(double angle);
+int setSpeed(int angle);
+double turningRadius(double angle);
+double turningAngle(int left, int right);
+
+
 double leastSqrRegression(vector<Point> xyCollection);
 vector<SingleContour>  outerBounds(vector<vector<Point> >& contours);
 int processVideo(VideoCapture& Camera);
@@ -66,7 +83,7 @@ void laneDetect(Mat& input, Directions& D);
 int processDirections(Directions& D);
 vector<Point> findPoints(vector<vector<Point> > contours, Point midPoint);
 Point intersection(vector<Point> contour, Point midPoint);
-vector<Point>  contourBounds(vector<vector<Point> >& contours, Mat& input);
+vector<Point>  contourBounds(vector<vector<Point> >& contours, Mat& input, double& left, double& right);
 void emitDirections(Directions& d);
 FuzzyColor fuzzyColor;
 Size frameSize;
@@ -253,7 +270,7 @@ int processImage(Mat& frame) {
 */
 		Directions D;
 		laneDetect(fuzzyEdges, D);
-
+		emitDirections(D);
 
 
 		imshow("contours", frame);
@@ -277,12 +294,13 @@ int processImage(Mat& frame) {
 	5. determine a direction set to drive the car.
 
 */
+
 void laneDetect(Mat& input, Directions& D) {
 	Mat circleImg(frameSize, CV_THRESH_BINARY);
 	int st = input.cols;
 	//split the image up into sections
 	Mat img1, img2, img3, img4;
-	
+
 	Rect Ra1(0, frameSize.height / 2, frameSize.width / 4, frameSize.height / 4);
 	Rect Ra2(frameSize.width / 4, frameSize.height / 2, frameSize.width / 4, frameSize.height / 4);
 	Rect Rb1(0, (frameSize.height / 4) * 3, frameSize.width / 4, frameSize.height / 4);
@@ -302,36 +320,127 @@ void laneDetect(Mat& input, Directions& D) {
 	rectangle(circleImg, Rc2, Scalar(255, 255, 255));
 	rectangle(circleImg, Rd1, Scalar(255, 255, 255));
 	rectangle(circleImg, Rd2, Scalar(255, 255, 255));
-	
+
 	std::vector<std::vector<Point> > contours;
 	std::vector<Vec4i> hierarchy;
 	findContours(input, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 	vector<vector<Point> > intersections;
-	
-	vector<Point> circles = contourBounds(contours, input);
+
+	double left = 0;
+	double right = 0;
+	vector<Point> circles = contourBounds(contours, input, left, right);
 	for (int i = 0; i < circles.size(); i++)
 	{
 		circle(circleImg, circles[i], 1, Scalar(255, 255, 255), 2);
 	}
 
 
-	
-	for (int i = input.rows; i > input.rows/2; i=i-1) {
-		circle(circleImg, Point(input.cols / 2, i), 1, Scalar(100, 100, 100), 1);
-	//	intersections.push_back(findPoints(contours, Point(input.cols / 2, i)));
-	}
-	
-	/*for (int i = 0; i < intersections.size(); i++) {
-		for (int j = 0; j < intersections[i].size(); j++) {
-			circle(input, intersections[i][j], 2, Scalar(255, 255, 255), 5);
-		}
-	}*/
-	imshow("lanedetection", circleImg);
-	
-	D.angle = 75;
-	D.speed = 100;
 
-	emitDirections(D);
+	for (int i = input.rows; i > input.rows / 2; i = i - 1) {
+		circle(circleImg, Point(input.cols / 2, i), 1, Scalar(100, 100, 100), 1);
+		//	intersections.push_back(findPoints(contours, Point(input.cols / 2, i)));
+	}
+
+	/*for (int i = 0; i < intersections.size(); i++) {
+	for (int j = 0; j < intersections[i].size(); j++) {
+	circle(input, intersections[i][j], 2, Scalar(255, 255, 255), 5);
+	}
+	}*/
+
+
+
+	// 75 Deg = straight. 
+	//D.angle = 75;
+	D.angle = turningAngle(left, right);
+	D.speed = setSpeed(D.angle);
+
+	cout << "D.angle: " << D.angle << endl;
+	cout << "D.speed: " << D.speed << endl;
+
+	int radius = turningRadius(D.angle);
+	double scale = 14.2222;						// Magic number!
+	radius *= scale;
+
+	cout << "raidus: " << radius << endl;
+	int centreX = 0;
+	if (D.angle > 75) {
+		centreX = (input.cols / 2) + radius;
+	}
+	else if (D.angle < 75) {
+		centreX = (input.cols / 2) - radius;
+	}
+	circle(circleImg, Point(centreX, input.rows), radius, Scalar(100, 100, 100), 1);
+
+	// Draw an image
+	imshow("lanedetection", circleImg);
+}
+
+
+// This function converts the relative angle to 20-130 angles
+int convertTurningAngle(double angle) {
+	int result = 75;			// Centre is at 75 degrees
+	int min = 20;				// Furthest left the car can turn
+	int max = 130;				// Furthest right the car can turn
+	if (angle < 0) {
+		result -= abs(angle);	// Left turn
+		if (result <= min)
+			result = min;
+	}
+	else {
+		result += abs(angle);	// Right turn
+		if (result >= max)
+			result = max;
+	}
+	return result;
+}
+/*
+turningAngle() will calculate how much we need to turn left or right according to the dot density from filters
+Negative angle = left turn
+Positive angle = right turn
+*/
+double turningAngle(int left, int right) {
+	double result = 0.0;
+
+	// Something simple...
+	if (left != 0 && right != 0) {
+		cout << "Left: " << left << " || Right: " << right << endl;
+		result = left - right;
+	}
+	else {
+		// Go straight
+		result = 75;
+	}
+	result = convertTurningAngle(result);
+	return result;
+}
+
+double turningRadius(double angle) {
+	double result = 0.0;
+	angle = abs(angle - 75);
+	int length = 34;				// Wheelbase of the car
+
+	if (angle == 0) {
+		// Straight
+		result = 0.0;
+	}
+	else {
+		result = length / (2 * sin(angle * M_PI / 180));	// Because radians... (-_-)
+	}
+
+	return result;
+}
+
+int setSpeed(int angle) {
+	int min = 100;					// Minimum speed the vehicle can go
+	int max = 133;					// Maximum speed the vehicle can go
+	int range = abs(max - min);		// The speed range
+	int straight = 75;				// The angle for driving straight
+
+
+	double percentAngle = abs((double)straight - angle) / straight;
+	double speed = percentAngle * range;
+	int result = max - speed;
+	return result;
 }
 
 /* Process the determined directions and send them to the motor
@@ -468,7 +577,7 @@ Point intersection(vector<Point> contour, Point midPoint) {
 	return output;
 }
 
-vector<Point>  contourBounds(vector<vector<Point> >& contours, Mat& input) {
+vector<Point>  contourBounds(vector<vector<Point> >& contours, Mat& input, double& left, double& right) {
 	Mat singleContour(frameSize, CV_8U);
 	int Ca1 = 0, Ca2 = 0, Cb1 = 0, Cb2 = 0, Cc1 = 0, Cc2 = 0, Cd1 = 0, Cd2 = 0;
 	Rect Ra1(0, frameSize.height / 2, frameSize.width / 4, frameSize.height / 4);
@@ -534,8 +643,8 @@ vector<Point>  contourBounds(vector<vector<Point> >& contours, Mat& input) {
 	 Cd2 *= wd2;
 
 	// Average the left/right
-	double left = (Ca1 + Ca2 + Cb1 + Cb2) / 4;
-	double right = (Cc1 + Cc2 + Cd1 + Cd2) / 4;
+	left = (Ca1 + Ca2 + Cb1 + Cb2) / 4;
+	right = (Cc1 + Cc2 + Cd1 + Cd2) / 4;
 	cout << left << " " << right << " " << left-right<<endl;
 	//	imshow("singleContour", singleContour);
 	cout << Ca1 << " " << Ca2 << " " << Cb1 << " " << Cb2 << " " << Cc1 << " " << Cc2 << " " << Cd1 << " " << Cd2 << " " << endl;
