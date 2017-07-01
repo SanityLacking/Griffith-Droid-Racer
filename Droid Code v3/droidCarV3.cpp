@@ -8,6 +8,12 @@
 #include <iostream>
 #include <numeric>
 
+//socket file
+#define CV_H
+#include <iostream>
+#include <conio.h>
+#include "UDPClient.h"
+//#include "socketReceive.hpp"
 
 #include "fuzzyColor.h"
 
@@ -15,6 +21,10 @@
 using namespace cv;
 using namespace std;
 
+//socket
+char *addr = "127.0.0.1";
+int UDPMAX = 65507;
+int port = 5000;
 
 struct Directions {
 	int speed = 0;
@@ -43,6 +53,8 @@ public:
 double leastSqrRegression(vector<Point> xyCollection);
 vector<SingleContour>  outerBounds(vector<vector<Point> >& contours);
 int processVideo(VideoCapture& Camera);
+int processVideo();
+//int processVideo(SocketReceive &socket);
 int processImage(Mat& frame);
 void laneDetect(Mat& input, Directions& D);
 int processDirections(Directions& D);
@@ -56,17 +68,24 @@ Size frameSize;
 int main(int argc, char** argv)
 {
 	VideoCapture cap;
+	processVideo();
 	// open the default camera, use something different from 0 otherwise;
 	// Check VideoCapture documentation.
+	/*
+	SocketReceive socket;
 
-	
+	socket.connect();
+	processVideo(socket);
+	*/
+	/*
 	// to open the default web camera
 	if (!cap.open(0)){
 	cout << "Camera Is not able to be Opened, is it connected?" << endl;
 	return 0;
 	cin.ignore();
 	}
-	
+	*/
+
 	/*
 	// to open video file
 	if (!cap.open("Video_1.mp4")) {
@@ -77,7 +96,7 @@ int main(int argc, char** argv)
 	*/
 	//process the camera input
 	
-	processVideo(cap);
+	//processVideo(cap);
 	
 
 	//testing call
@@ -86,8 +105,52 @@ int main(int argc, char** argv)
 	// cap.close();
 	return 0;
 }
+int processVideo() {
+	cout << "=== VIDEO RECEIVER ===" << endl;
 
+	//setup UDP client
+	UDPClient *client = new UDPClient(port);
+	char *buff = (char*)malloc(UDPMAX);
+
+	//setup openCV
+	cvNamedWindow("UDP Video Receiver", CV_WINDOW_AUTOSIZE);
+	vector<uchar> videoBuffer;
+
+	while (1){
+		//read data
+		int result = client->receiveData(buff, UDPMAX);
+		if (result < 0){
+			cout << "Failed to receive frame." << endl;
+			continue;
+		}
+		cout << "Got a frame of size " << result << endl;
+
+		videoBuffer.resize(result);
+		memcpy((char*)(&videoBuffer[0]), buff, result);
+
+		//reconstruct jpeg and display it
+		Mat jpegimage = imdecode(Mat(videoBuffer), CV_LOAD_IMAGE_COLOR);
+		IplImage img = jpegimage;
+		cvShowImage("UDP Video Receiver", &img);
+		processImage(jpegimage);
+		cvWaitKey(5);
+	}
+	return 0;
+}
+/*
 //process input
+int processVideo(SocketReceive &socket) {
+	for (;;)
+	{
+		//Mat frame; // matrix container for image frame
+		Mat frame = socket.getFrame();
+		if (frame.empty()) break; // end of video stream
+		processImage(frame);
+		if (waitKey(1) == 27) break; // stop capturing by pressing ESC 
+	}
+	return 0;
+}
+*/
 int processVideo(VideoCapture& camera) {
 	for (;;)
 	{
@@ -95,17 +158,6 @@ int processVideo(VideoCapture& camera) {
 		camera >> frame; //grab the next frame of video in sequence
 		if (frame.empty()) break; // end of video stream
 		processImage(frame);
-
-								  //do stuff with the image,
-
-	/*	Mat edges;
-		cvtColor(frame, edges, COLOR_BGR2GRAY);
-		GaussianBlur(edges, edges, Size(7, 7), 1.5, 1.5);
-		Canny(edges, edges, 0, 30, 3);
-		imshow("edges", edges); // display the frame for the user to view
-
-		imshow("this is you, smile! :)", frame); // display the frame for the user to view
-		*/
 		if (waitKey(1) == 27) break; // stop capturing by pressing ESC 
 	}
 	return 0;
