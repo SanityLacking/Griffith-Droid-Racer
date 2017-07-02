@@ -714,13 +714,13 @@ TODO add the client it is supposed to use to this function to make it more indep
 */
 void emitDirections(Directions& D) {
 	std::ostringstream oss;
-	oss << D.angle << ":" << D.speed;
+	oss << D.angle << "," << D.speed;
 	string message = oss.str();
 	std::vector<uchar> buff(message.c_str(), message.c_str() + message.length() + 1);
 	int returnResult = returnClient->sendData((char*)(&buff[0]), buff.size());
 	if (returnResult < 0)
 		cout << "Failed to send." << endl;
 	else
-		cout << "Sent a frame of size " << returnResult << endl;
+		cout << message << endl;
 
 }
