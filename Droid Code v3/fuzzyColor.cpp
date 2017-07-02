@@ -59,6 +59,21 @@ void FuzzyColor::processFuzzyColor(Mat& img, Mat& outputImg){
 	//laneDetection();
 }
 
+void FuzzyColor::processSingleFuzzyColor(Mat& img, Mat& outputImg, String color){
+	img.copyTo(rescaledImg);
+	resize(img, rescaledImg, Size(), 0.25, 0.25, INTER_LINEAR);
+	destImg = Mat::zeros(rescaledImg.size(), CV_8UC3);
+	//	cout << "fuzzy Color"<<endl;
+	if (color == "blue")
+		single_colourClassify_rg(blueCL, rescaledImg, destImg);
+	else if (color == "yellow")
+		single_colourClassify_rg(yellowCL, rescaledImg, destImg);
+	resize(destImg, destImg, img.size());
+	outputImg = destImg;
+	//laneDetection();
+}
+
+
 
 
 void FuzzyColor::multi_colourClassify_rg_3(ColorClassifier color1,ColorClassifier color2,ColorClassifier color3,Mat &sourceImg, Mat &destImg){
@@ -287,6 +302,110 @@ void FuzzyColor::multi_colourClassify_rg_3(ColorClassifier color1,ColorClassifie
     } //End for loop - x
     
 }
+
+void FuzzyColor::single_colourClassify_rg(ColorClassifier color1, Mat &sourceImg, Mat &destImg){
+	int MINX, MAXX, MINY, MAXY;
+	MINX = 0; MAXX = sourceImg.cols;
+	MINY = 0; MAXY = sourceImg.rows;
+	// greyImg = Mat::zeros(img.rows, img.cols, CV_8UC3);
+	if (RESCALE_IMAGE)
+		destImg = Mat::zeros(rescaledImg.size(), CV_8UC3);
+	else
+		destImg = Mat::zeros(sourceImg.size(), CV_8UC3);
+	//---
+	for (int x = MINX; x < MAXX; x++){
+		for (int y = MINY; y < MAXY; y++){
+			Vec3b intensity = sourceImg.at<Vec3b>(y, x);
+			uchar blue = intensity.val[0];
+			uchar green = intensity.val[1];
+			uchar red = intensity.val[2];
+
+			float chR, chG;
+			float chRGB = (float(red) + float(green) + float(blue));
+			chR = float(red) / chRGB;
+			chG = float(green) / chRGB;
+
+			float radius = float(pow(double(chR - 0.333), 2.0)) + float(pow(double(chG - 0.333), 2.0));
+			float angle = GetAngle(chR, chG);
+
+			//==== RG Color Model ============================
+			//Target #1 - Yellow
+			intensity = sourceImg.at<Vec3b>(y, x);
+			blue = intensity.val[0];
+			green = intensity.val[1];
+			red = intensity.val[2];
+
+			chRGB = (float(red) + float(green) + float(blue));
+			chR = float(red) / chRGB;
+			chG = float(green) / chRGB;
+
+			radius = float(pow(double(chR - 0.333), 2.0)) + float(pow(double(chG - 0.333), 2.0));
+			angle = GetAngle(chR, chG);
+
+			//==== RG Color Model ============================
+			if (angle >= color1.min_contrast_angle && angle <= color1.max_contrast_angle)
+			{
+				/// Contrast Operations ////////////////////////////////// 
+				//0 - degrade, 1 - enhance, 2 - retain
+				if (color1.redContrast == 1)
+					red = FuzzyEnhanceX(red, 0.5, short(color1.redContrastLevel));
+				else if (color1.redContrast == 0.0)
+					red = FuzzyDegradeX(red, 0.5, short(color1.redContrastLevel));
+				if (color1.greenContrast == 1)
+					green = FuzzyEnhanceX(green, 0.5, short(color1.greenContrastLevel));
+				else if (color1.greenContrast == 0.0)
+					green = FuzzyDegradeX(green, 0.5, short(color1.greenContrastLevel));
+				if (color1.blueContrast == 1)
+					blue = FuzzyEnhanceX(blue, 0.5, short(color1.blueContrastLevel));
+				else if (color1.blueContrast == 0.0)
+					blue = FuzzyDegradeX(blue, 0.5, short(color1.blueContrastLevel));
+			}
+			//---
+			/// End of Contrast Operations //////////////////////////////////   
+
+
+			chRGB = (float(red) + float(green) + float(blue));
+			if (chRGB > 0)
+			{
+				chR = float(red) / chRGB;
+				chG = float(green) / chRGB;
+
+				radius = float(pow(double(chR - 0.333), 2)) + float(pow(double(chG - 0.333), 2));
+				angle = GetAngle(chR, chG);
+
+				//////////////////////////////
+				Vec3b newColour;
+				//if(y >= Ly && y <= Uy && u >= Lu && u <= Uu && v >= Lv && v <= Uv) 
+				if (angle >= color1.min_angle && angle <= color1.max_angle && radius >= color1.min_radius && radius <= color1.max_radius){
+					// LookUpTable[index_lut] = Color; 
+					// newColour.val[0] = 0;
+					// newColour.val[1] = 0; //green
+					// newColour.val[2] = 255; // red
+
+					newColour.val[0] = 255;
+					newColour.val[1] = 255; //green
+					newColour.val[2] = 255; // red
+					destImg.at<Vec3b>(Point(x, y)) = newColour;
+				}
+				else {
+					// newColour.val[0] = 255;
+					// newColour.val[1] = 255;
+					// newColour.val[2] = 255;
+					// newColour.val[0] = blue;
+					// newColour.val[1] = green;
+					// newColour.val[2] = red;
+					newColour.val[0] = 0;
+					newColour.val[1] = 0;
+					newColour.val[2] = 0;
+					destImg.at<Vec3b>(Point(x, y)) = newColour;
+				}
+
+			}
+		} //End for loop - y
+	} //End for loop - x
+
+}
+
 
 
 void FuzzyColor::laneDetection(){

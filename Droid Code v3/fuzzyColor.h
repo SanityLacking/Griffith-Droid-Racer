@@ -20,10 +20,11 @@ public:
 	FuzzyColor();
 
 	void processFuzzyColor(Mat& frame, Mat& outputImg);
-	
+	void processSingleFuzzyColor(Mat& img, Mat& outputImg, String color);
 private:
 
 	void multi_colourClassify_rg_3(ColorClassifier color1,ColorClassifier color2,ColorClassifier color3,Mat &sourceImg, Mat &destImg);
+	void single_colourClassify_rg(ColorClassifier color1, Mat &sourceImg, Mat &destImg);
 	void laneDetection();
 
 	 float GetAngle(float ChR, float ChG);

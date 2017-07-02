@@ -28,6 +28,7 @@
 
 #include "fuzzyColor.h"
 
+#include "SerialPort.h"
 
 
 using namespace cv;
@@ -41,6 +42,7 @@ int port = 5000;
 char *returnAddr = "192.168.0.109";
 int returnPort = 5001;
 
+FILE *file;
 
 // Debug
 bool debug = true;
@@ -95,6 +97,7 @@ double leastSqrRegression(vector<Point> xyCollection);
 vector<SingleContour>  outerBounds(vector<vector<Point> >& contours);
 int processVideo(VideoCapture& Camera);
 int processVideo(Sectors& S);
+int processVideo(VideoCapture& Camera, Sectors& S);
 //int processVideo(SocketReceive &socket);
 int processImage(Mat& frame, Sectors& S);
 void laneDetect(Mat& input, Directions& D, Sectors& S);
@@ -104,11 +107,21 @@ Point intersection(vector<Point> contour, Point midPoint);
 vector<Point>  contourBounds(vector<vector<Point> >& contours, Mat& input, double& left, double& right);
 void emitDirections(Directions& d);
 int angleConversion(int input);
+void serialComm(String& message);
 FuzzyColor fuzzyColor;
 Size frameSize;
 
+char *port_name = "\\\\.\\COM9";
+
+//SerialPort arduino(port_name);
+
 int main(int argc, char** argv)
 {
+	//if (arduino.isConnected()) cout << "Connection Established" << endl;
+	//else cout << "ERROR, check port name";
+
+
+	//SerialPort arduino(port_name);
 	VideoCapture cap;
 	Sectors S;
 	processVideo(S);
@@ -149,15 +162,33 @@ int processVideo(Sectors& S) {
 	return 0;
 }
 int processVideo(VideoCapture& camera, Sectors& S) {
+	if (!camera.open(0)) {
+		cout << "Error opening video stream1" << endl;
+	}
+	while (1) {
+		//read data
+		//int result = client->receiveData(buff, UDPMAX);
+		//if (result < 0) {
+		//	cout << "Failed to receive frame." << endl;
+		//	continue;
+		//}
+		Mat frame;
+		camera >> frame; //grab the next frame of video in sequence
+		processImage(frame, S);
+		waitKey(1);
+	}
+	return 0;
+	/*
 	for (;;)
 	{
 		Mat frame; // matrix container for image frame
-		camera >> frame; //grab the next frame of video in sequence
+		
 		if (frame.empty()) break; // end of video stream
 		processImage(frame, S);
 		if (waitKey(1) == 27) break; // stop capturing by pressing ESC 
 	}
 	return 0;
+	*/
 }
 
 
@@ -181,12 +212,21 @@ int processImage(Mat& frame, Sectors& S) {
 	//resize(frame, frame, Size(frame.cols / 2, frame.rows / 2));
 	//circle(frame, Point(frame.cols / 2, frame.rows/2), 5, Scalar(0, 0, 0),5);
 
-	if (debug)
-		imshow("frame", frame);
+	//if (debug)
+	//	imshow("frame", frame);
 	Mat edges, frame_thresholdBlue, frame_thresholdYellow, frame_hsv;
 	Mat element = getStructuringElement(MORPH_RECT, Size(3, 3), Point(2, 2));
 
 	Mat fuzzyImg, fuzzyEdges;
+	//fuzzyColor.processFuzzyColor(frame, fuzzyImg);
+	/*
+	Mat leftCornerRect(frame, Rect(frameSize.width * 0, frameSize.height / 2, frameSize.width/2, frameSize.height/2));
+	Mat rightCornerRect(frame, Rect(frameSize.width /2, frameSize.height / 2, frameSize.width / 2, frameSize.height / 2));
+	imshow("left", leftCornerRect);
+	imshow("right", rightCornerRect);
+	fuzzyColor.processSingleFuzzyColor(frame, fuzzyImg, "blue");
+	fuzzyColor.processSingleFuzzyColor(frame, fuzzyImg, "yellow");
+	*/
 	fuzzyColor.processFuzzyColor(frame, fuzzyImg);
 	if (debug)
 		imshow("fuzzyColor", fuzzyImg);
@@ -213,12 +253,12 @@ int processImage(Mat& frame, Sectors& S) {
 		imshow("edges", edges); // display the frame for the user to view
 
 	Mat bitwiseImg;
-	bitwise_or(frame_thresholdBlue, frame_thresholdYellow, bitwiseImg);
-	erode(bitwiseImg, bitwiseImg, element, Point(1, 1), 1);
-	dilate(bitwiseImg, bitwiseImg, element, Point(1, 1), 2);
-	if (debug)
-		imshow("bluandYel", bitwiseImg);
-	bitwise_and(bitwiseImg, edges, bitwiseImg);
+	//bitwise_or(frame_thresholdBlue, frame_thresholdYellow, bitwiseImg);
+	//erode(bitwiseImg, bitwiseImg, element, Point(1, 1), 1);
+	//dilate(bitwiseImg, bitwiseImg, element, Point(1, 1), 2);
+	//if (debug)
+		//imshow("bluandYel", bitwiseImg);
+	//bitwise_and(bitwiseImg, edges, bitwiseImg);
 
 
 	//fuzzy
@@ -231,8 +271,8 @@ int processImage(Mat& frame, Sectors& S) {
 
 
 	if (debug) {
-		imshow("contours", frame);
-		imshow("combined", bitwiseImg);
+		//imshow("contours", frame);
+		//imshow("combined", bitwiseImg);
 	}
 
 
@@ -401,6 +441,29 @@ int convertTurningAngle(double angle) {
 	int result = 75;			// Centre is at 75 degrees
 	int min = 20;				// Furthest left the car can turn
 	int max = 130;				// Furthest right the car can turn
+
+
+	cout << "convertTurningAngle(" << angle << ")" << endl;
+	if (angle != result){
+		int rel = abs(result - angle);
+		if (angle < result){
+			cout << "angle < result" << endl;
+			result += rel;
+			if (result < min){
+				result = min;
+			}
+		}
+		else {
+			cout << "angle > result" << endl;
+			result -= rel;
+			cout << "result: " << result << endl;
+			if (result > max){
+				result = max;
+			}
+		}
+	}
+
+	/*
 	if (angle < result) {
 		result -= abs(angle);	// Left turn
 		if (result <= min)
@@ -411,6 +474,7 @@ int convertTurningAngle(double angle) {
 		if (result >= max)
 			result = max;
 	}
+	*/
 
 	cout << "convertTurningAngle(): " << result << endl;
 	return result;
@@ -443,6 +507,7 @@ double turningAngle(int left, int right) {
 		result = 75;
 	}
 	*/
+	cout << "turningAngle(): " << result << endl;
 	result = convertTurningAngle(result);
 	return result;
 }
@@ -738,13 +803,15 @@ void emitDirections(Directions& D) {
 	int speed = 100; // D.speed
 	oss << angle << "," << speed;
 	string message = oss.str();
+	
 	std::vector<uchar> buff(message.c_str(), message.c_str() + message.length() + 1);
 	int returnResult = returnClient->sendData((char*)(&buff[0]), buff.size());
 	if (returnResult < 0)
 		cout << "Failed to send." << endl;
 	else
 		cout << message << endl;
-
+	
+	
 }
 int angleConversion(int input) {
 	int result;
@@ -754,3 +821,23 @@ int angleConversion(int input) {
 
 	return result;
 }
+/*
+void serialComm(String& input_string){
+	//String for getting the output from arduino
+	char output[MAX_DATA_LENGTH];
+
+	char incomingData[MAX_DATA_LENGTH];
+
+	char *c_string = new char[input_string.size() + 1];
+	//copying the std::string to c string
+	std::copy(input_string.begin(), input_string.end(), c_string);
+	//Adding the delimiter
+	c_string[input_string.size()] = '\n';
+	//Writing string to arduino
+	arduino.writeSerialPort(c_string, MAX_DATA_LENGTH);
+	//Getting reply from arduino
+	arduino.readSerialPort(output, MAX_DATA_LENGTH);
+	//printing the output
+	cout << output << endl;
+}
+*/
