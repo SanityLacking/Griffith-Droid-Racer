@@ -92,40 +92,6 @@ int main(int argc, char** argv)
 {
 	VideoCapture cap;
 	processVideo();
-	// open the default camera, use something different from 0 otherwise;
-	// Check VideoCapture documentation.
-	/*
-	SocketReceive socket;
-
-	socket.connect();
-	processVideo(socket);
-	*/
-	/*
-	// to open the default web camera
-	if (!cap.open(0)){
-	cout << "Camera Is not able to be Opened, is it connected?" << endl;
-	return 0;
-	cin.ignore();
-	}
-	*/
-
-	/*
-	// to open video file
-	if (!cap.open("Video_1.mp4")) {
-		cout << "video file Is not able to be Opened, does it exist?" << endl;
-		cin.ignore();
-		return 0;
-	}
-	*/
-	//process the camera input
-	
-	//processVideo(cap);
-	
-
-	//testing call
-
-	// the camera will be closed automatically upon exit
-	// cap.close();
 	return 0;
 }
 int processVideo() {
@@ -162,20 +128,6 @@ int processVideo() {
 	}
 	return 0;
 }
-/*
-//process input
-int processVideo(SocketReceive &socket) {
-	for (;;)
-	{
-		//Mat frame; // matrix container for image frame
-		Mat frame = socket.getFrame();
-		if (frame.empty()) break; // end of video stream
-		processImage(frame);
-		if (waitKey(1) == 27) break; // stop capturing by pressing ESC 
-	}
-	return 0;
-}
-*/
 int processVideo(VideoCapture& camera) {
 	for (;;)
 	{
@@ -199,9 +151,6 @@ int processVideo(VideoCapture& camera) {
 	perform errode/dilate/blur
 	perform edge detection method: sobel, canny or other?
 	map between lines 
-
-
-	
 
 */
 int processImage(Mat& frame) {
@@ -251,23 +200,6 @@ int processImage(Mat& frame) {
 		//fuzzy
 		bitwise_and(fuzzyEdges, edges, fuzzyEdges);
 		imshow("fuzzyEdges", fuzzyEdges);
-
-/*
-		std::vector<std::vector<Point> > contours;
-		std::vector<Vec4i> hierarchy;
-		findContours(bitwiseImg, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
-
-		Mat contoursImg;
-		RNG rng(12345);
-		vector<double> lengths;
-		for (int i = 0; i < contours.size(); i++)
-		{
-			lengths.push_back(arcLength(contours[i], false));
-			Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
-			drawContours(frame, contours, i, color);
-
-		}
-*/
 		Directions D;
 		laneDetect(fuzzyEdges, D);
 		emitDirections(D);
@@ -340,15 +272,7 @@ void laneDetect(Mat& input, Directions& D) {
 		circle(circleImg, Point(input.cols / 2, i), 1, Scalar(100, 100, 100), 1);
 		//	intersections.push_back(findPoints(contours, Point(input.cols / 2, i)));
 	}
-
-	/*for (int i = 0; i < intersections.size(); i++) {
-	for (int j = 0; j < intersections[i].size(); j++) {
-	circle(input, intersections[i][j], 2, Scalar(255, 255, 255), 5);
-	}
-	}*/
-
-
-
+	
 	// 75 Deg = straight. 
 	//D.angle = 75;
 	D.angle = turningAngle(left, right);
@@ -456,26 +380,6 @@ int processDirections(Directions& D) {
 	return 0;
 }
 
-/*
-Point findPoint(vector<vector<Point> > contours, Point midPoint) {
-	Point selectedPoint(-1, -1);
-	for (int i = 0; i < contours.size(); i++) {
-		//cout<< "loop Internal: "<<i<<endl; 
-		for (int j = 0; j < contours[i].size(); j++) {
-			if (selectedPoint.x == -1) {
-				selectedPoint = contours[i][j];
-			}
-			//find point that is closest to lane section midpoint	
-			if (abs(contours[i][j].y - midPoint.y) < abs(selectedPoint.y - midPoint.y)) {
-				//point is closer
-				//cout <<"i:" << i << " blu:" << contoursBlu[i][j] << endl;
-	
-	selectedPoint = contours[i][j];
-			}
-		}
-	}
-	return selectedPoint;
-}
 */
 /* direction 0 both directions, 1 left, 2 right.
 */
@@ -491,25 +395,6 @@ vector<Point> findPoints(vector<vector<Point> > contours, Point midPoint) {
 			
 	}	
 	return selectedPoints;
-	/*
-	for (int i = 0; i < contours.size(); i++) {
-		//check if contour contains the y value
-		//Point Cstart = contours[i].begin();
-		//if (midPoint.y >= contours[i].begin() && midPoint.y <= contours[i].end()))
-		for (int j = 0; j < contours[i].size(); j++)
-		{
-			if (direction == 0) {
-				if (abs(contours[i][j].y - midPoint.y) < abs( - midPoint.y)) {
-					//point is closer
-					//cout <<"i:" << i << " blu:" << contoursBlu[i][j] << endl;
-					//selectedPoint = contours[i][j];
-				}
-			}
-
-
-		}
-	}
-	*/	
 }
 
 /*
