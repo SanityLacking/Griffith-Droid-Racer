@@ -43,6 +43,13 @@ int returnPort = 5001;
 // Debug
 bool debug = false;
 
+// Ryoma's Functions
+int convertTurningAngle(double angle);
+int setSpeed(int angle);
+double turningRadius(double angle);
+double turningAngle(int left, int right);
+int fCount = 0;
+
 UDPClient *returnClient = new UDPClient(returnAddr, returnPort);
 
 struct Directions {
@@ -51,6 +58,10 @@ struct Directions {
 
 	int prevSpeed = 0;
 	int prevAngle = 0;
+};
+
+struct Sectors {
+	int Cca1 = 0;
 };
 
 
@@ -70,12 +81,6 @@ public:
 	}
 };
 
-
-// Ryoma's Functions
-int convertTurningAngle(double angle);
-int setSpeed(int angle);
-double turningRadius(double angle);
-double turningAngle(int left, int right);
 
 
 double leastSqrRegression(vector<Point> xyCollection);
@@ -246,25 +251,43 @@ void laneDetect(Mat& input, Directions& D) {
 	//split the image up into sections
 	Mat img1, img2, img3, img4;
 
-	Rect Ra1(0, frameSize.height / 2, frameSize.width / 4, frameSize.height / 4);
-	Rect Ra2(frameSize.width / 4, frameSize.height / 2, frameSize.width / 4, frameSize.height / 4);
-	Rect Rb1(0, (frameSize.height / 4) * 3, frameSize.width / 4, frameSize.height / 4);
-	Rect Rb2(frameSize.width / 4, (frameSize.height / 4) * 3, frameSize.width / 4, frameSize.height / 4);
+	// First row of rectangles
+	Rect Ra1((frameSize.width / 8) * 0, (frameSize.height / 4) * 2, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Ra2((frameSize.width / 8) * 1, (frameSize.height / 4) * 2, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Ra3((frameSize.width / 8) * 2, (frameSize.height / 4) * 2, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Ra4((frameSize.width / 8) * 3, (frameSize.height / 4) * 2, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rb4((frameSize.width / 8) * 4, (frameSize.height / 4) * 2, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rb3((frameSize.width / 8) * 5, (frameSize.height / 4) * 2, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rb2((frameSize.width / 8) * 6, (frameSize.height / 4) * 2, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rb1((frameSize.width / 8) * 7, (frameSize.height / 4) * 2, (frameSize.width / 8), (frameSize.height / 4));
 
-	Rect Rc1((frameSize.width / 4) * 3, frameSize.height / 2, frameSize.width / 4, frameSize.height / 4);
-	Rect Rc2(frameSize.width / 2, frameSize.height / 2, frameSize.width / 4, frameSize.height / 4);
-	Rect Rd1((frameSize.width / 4) * 3, (frameSize.height / 4) * 3, frameSize.width / 4, frameSize.height / 4);
-	Rect Rd2(frameSize.width / 2, (frameSize.height / 4) * 3, frameSize.width / 4, frameSize.height / 4);
+	// Second row of rectangles
+	Rect Rc1(((frameSize.width / 8)) * 0, (frameSize.height / 4) * 3, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rc2(((frameSize.width / 8)) * 1, (frameSize.height / 4) * 3, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rc3(((frameSize.width / 8)) * 2, (frameSize.height / 4) * 3, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rc4(((frameSize.width / 8)) * 3, (frameSize.height / 4) * 3, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rd4(((frameSize.width / 8)) * 4, (frameSize.height / 4) * 3, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rd3(((frameSize.width / 8)) * 5, (frameSize.height / 4) * 3, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rd2(((frameSize.width / 8)) * 6, (frameSize.height / 4) * 3, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rd1(((frameSize.width / 8)) * 7, (frameSize.height / 4) * 3, (frameSize.width / 8), (frameSize.height / 4));
 
 
 	rectangle(circleImg, Ra1, Scalar(255, 255, 255));
 	rectangle(circleImg, Ra2, Scalar(255, 255, 255));
+	rectangle(circleImg, Ra3, Scalar(255, 255, 255));
+	rectangle(circleImg, Ra4, Scalar(255, 255, 255));
 	rectangle(circleImg, Rb1, Scalar(255, 255, 255));
 	rectangle(circleImg, Rb2, Scalar(255, 255, 255));
+	rectangle(circleImg, Rb3, Scalar(255, 255, 255));
+	rectangle(circleImg, Rb4, Scalar(255, 255, 255));
 	rectangle(circleImg, Rc1, Scalar(255, 255, 255));
 	rectangle(circleImg, Rc2, Scalar(255, 255, 255));
+	rectangle(circleImg, Rc3, Scalar(255, 255, 255));
+	rectangle(circleImg, Rc4, Scalar(255, 255, 255));
 	rectangle(circleImg, Rd1, Scalar(255, 255, 255));
 	rectangle(circleImg, Rd2, Scalar(255, 255, 255));
+	rectangle(circleImg, Rd3, Scalar(255, 255, 255));
+	rectangle(circleImg, Rd4, Scalar(255, 255, 255));
 
 	std::vector<std::vector<Point> > contours;
 	std::vector<Vec4i> hierarchy;
@@ -288,16 +311,25 @@ void laneDetect(Mat& input, Directions& D) {
 
 	// 75 Deg = straight. 
 	//D.angle = 75;
-	D.angle = turningAngle(left, right);
-	D.speed = setSpeed(D.angle);
+	if (fCount < 5) {
+		fCount++;
+	}
+	else {
+		D.angle = turningAngle(left, right);
+		D.speed = setSpeed(D.angle);
 
-	cout << "D.angle: " << D.angle << endl;
-	cout << "D.speed: " << D.speed << endl;
+
+		// Reset fCount
+		fCount = 0;
+	}
+
 
 	int radius = turningRadius(D.angle);
 	double scale = 14.2222;						// Magic number!
 	radius *= scale;
 
+	cout << "D.angle: " << D.angle << endl;
+	cout << "D.speed: " << D.speed << endl;
 	cout << "raidus: " << radius << endl;
 	if (D.angle == 75) {
 		// Straight Line
@@ -313,7 +345,6 @@ void laneDetect(Mat& input, Directions& D) {
 		}
 		circle(circleImg, Point(centreX, input.rows), radius, Scalar(0, 0, 255), 1);
 	}
-
 
 	// Draw an image
 	imshow("lanedetection", circleImg);
