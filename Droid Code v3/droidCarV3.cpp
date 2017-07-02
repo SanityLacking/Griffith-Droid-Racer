@@ -27,6 +27,7 @@
 #include "fuzzyColor.h"
 
 
+
 using namespace cv;
 using namespace std;
 
@@ -37,6 +38,10 @@ int port = 5000;
 
 char *returnAddr = "192.168.0.109";
 int returnPort = 5001;
+
+
+// Debug
+bool debug = false;
 
 UDPClient *returnClient = new UDPClient(returnAddr, returnPort);
 
@@ -105,10 +110,10 @@ int processVideo() {
 
 	vector<uchar> videoBuffer;
 
-	while (1){
+	while (1) {
 		//read data
 		int result = client->receiveData(buff, UDPMAX);
-		if (result < 0){
+		if (result < 0) {
 			cout << "Failed to receive frame." << endl;
 			continue;
 		}
@@ -143,73 +148,80 @@ int processVideo(VideoCapture& camera) {
 
 
 /*
-	Image processing per frame
-	Processing steps
-	Reduce frame size
-	Cut out Static Region of interest if nessecary
-	change colour if nessecary
-	perform errode/dilate/blur
-	perform edge detection method: sobel, canny or other?
-	map between lines 
+Image processing per frame
+Processing steps
+Reduce frame size
+Cut out Static Region of interest if nessecary
+change colour if nessecary
+perform errode/dilate/blur
+perform edge detection method: sobel, canny or other?
+map between lines
 
 */
 int processImage(Mat& frame) {
 
 	//while (true) {
-		//frame = imread("screenshots/light.png");
-		frameSize = frame.size();
-		//resize(frame, frame, Size(frame.cols / 2, frame.rows / 2));
-		//circle(frame, Point(frame.cols / 2, frame.rows/2), 5, Scalar(0, 0, 0),5);
+	//frame = imread("screenshots/light.png");
+	frameSize = frame.size();
+	//resize(frame, frame, Size(frame.cols / 2, frame.rows / 2));
+	//circle(frame, Point(frame.cols / 2, frame.rows/2), 5, Scalar(0, 0, 0),5);
 
+	if (debug)
 		imshow("frame", frame);
-		Mat edges, frame_thresholdBlue, frame_thresholdYellow, frame_hsv;
-		Mat element = getStructuringElement(MORPH_RECT, Size(3, 3), Point(2, 2));
+	Mat edges, frame_thresholdBlue, frame_thresholdYellow, frame_hsv;
+	Mat element = getStructuringElement(MORPH_RECT, Size(3, 3), Point(2, 2));
 
-		Mat fuzzyImg, fuzzyEdges;
-		fuzzyColor.processFuzzyColor(frame, fuzzyImg);
+	Mat fuzzyImg, fuzzyEdges;
+	fuzzyColor.processFuzzyColor(frame, fuzzyImg);
+	if (debug)
 		imshow("fuzzyColor", fuzzyImg);
-		cvtColor(fuzzyImg, fuzzyEdges, COLOR_BGR2GRAY);
-		blur(fuzzyEdges, fuzzyEdges, Size(3, 3));
-		dilate(fuzzyEdges, fuzzyEdges, element, Point(1, 1), 2);
+	cvtColor(fuzzyImg, fuzzyEdges, COLOR_BGR2GRAY);
+	blur(fuzzyEdges, fuzzyEdges, Size(3, 3));
+	dilate(fuzzyEdges, fuzzyEdges, element, Point(1, 1), 2);
 
 
-		cvtColor(frame, frame_hsv, COLOR_BGR2HSV);
-		cvtColor(frame, edges, COLOR_BGR2GRAY);
+	cvtColor(frame, frame_hsv, COLOR_BGR2HSV);
+	cvtColor(frame, edges, COLOR_BGR2GRAY);
 
 
-		inRange(frame_hsv, Scalar(92, 60, 40), Scalar(124, 256, 256), frame_thresholdBlue);
-		erode(frame_thresholdBlue, frame_thresholdBlue, element, Point(1, 1), 1);
-		inRange(frame_hsv, Scalar(20, 90, 160), Scalar(60, 256, 256), frame_thresholdYellow);
+	inRange(frame_hsv, Scalar(92, 60, 40), Scalar(124, 256, 256), frame_thresholdBlue);
+	erode(frame_thresholdBlue, frame_thresholdBlue, element, Point(1, 1), 1);
+	inRange(frame_hsv, Scalar(20, 90, 160), Scalar(60, 256, 256), frame_thresholdYellow);
 
-		//imshow("thresholdBlue", frame_thresholdBlue); // display the frame for the user to view
+	//imshow("thresholdBlue", frame_thresholdBlue); // display the frame for the user to view
 
 	//	imshow("thresholdYellow", frame_thresholdYellow); // display the frame for the user to view
 
-		GaussianBlur(edges, edges, Size(7, 7), 1.5, 1.5);
-		Canny(edges, edges, 0, 30, 3);
+	GaussianBlur(edges, edges, Size(7, 7), 1.5, 1.5);
+	Canny(edges, edges, 0, 30, 3);
+	if (debug)
 		imshow("edges", edges); // display the frame for the user to view
-		
-		Mat bitwiseImg;
-		bitwise_or(frame_thresholdBlue, frame_thresholdYellow, bitwiseImg);
-		erode(bitwiseImg, bitwiseImg, element, Point(1, 1), 1);
-		dilate(bitwiseImg, bitwiseImg, element, Point(1, 1), 2);
+
+	Mat bitwiseImg;
+	bitwise_or(frame_thresholdBlue, frame_thresholdYellow, bitwiseImg);
+	erode(bitwiseImg, bitwiseImg, element, Point(1, 1), 1);
+	dilate(bitwiseImg, bitwiseImg, element, Point(1, 1), 2);
+	if (debug)
 		imshow("bluandYel", bitwiseImg);
-		bitwise_and(bitwiseImg, edges, bitwiseImg);
+	bitwise_and(bitwiseImg, edges, bitwiseImg);
 
 
-		//fuzzy
-		bitwise_and(fuzzyEdges, edges, fuzzyEdges);
+	//fuzzy
+	bitwise_and(fuzzyEdges, edges, fuzzyEdges);
+	if (debug)
 		imshow("fuzzyEdges", fuzzyEdges);
-		Directions D;
-		laneDetect(fuzzyEdges, D);
-		emitDirections(D);
+	Directions D;
+	laneDetect(fuzzyEdges, D);
+	emitDirections(D);
 
 
+	if (debug) {
 		imshow("contours", frame);
 		imshow("combined", bitwiseImg);
+	}
 
 
-		//if (waitKey(1) == 27) break; // stop capturing by pressing ESC 
+	//if (waitKey(1) == 27) break; // stop capturing by pressing ESC 
 	//}
 
 	return 0;
@@ -217,18 +229,19 @@ int processImage(Mat& frame) {
 
 
 /* perform the lane detection on the now processed frame
-	output the driving instructions to the Struct
+output the driving instructions to the Struct
 
-	1. divide the image up into static sections
-	2. define spline along the center point 
-	3. find intersection points to the lanes on both sides of the spline in each section
-	4. use a weighted system to determine the influence of the spline points in each ROI section. the further the section is from the car the less weight it has.
-	5. determine a direction set to drive the car.
+1. divide the image up into static sections
+2. define spline along the center point
+3. find intersection points to the lanes on both sides of the spline in each section
+4. use a weighted system to determine the influence of the spline points in each ROI section. the further the section is from the car the less weight it has.
+5. determine a direction set to drive the car.
 
 */
 
 void laneDetect(Mat& input, Directions& D) {
-	Mat circleImg(frameSize, CV_THRESH_BINARY);
+	Mat circleImg(frameSize, CV_8UC3);
+	circleImg.setTo(Scalar(0, 0, 0));						// Set bg of image
 	int st = input.cols;
 	//split the image up into sections
 	Mat img1, img2, img3, img4;
@@ -272,7 +285,7 @@ void laneDetect(Mat& input, Directions& D) {
 		circle(circleImg, Point(input.cols / 2, i), 1, Scalar(100, 100, 100), 1);
 		//	intersections.push_back(findPoints(contours, Point(input.cols / 2, i)));
 	}
-	
+
 	// 75 Deg = straight. 
 	//D.angle = 75;
 	D.angle = turningAngle(left, right);
@@ -286,14 +299,21 @@ void laneDetect(Mat& input, Directions& D) {
 	radius *= scale;
 
 	cout << "raidus: " << radius << endl;
-	int centreX = 0;
-	if (D.angle > 75) {
-		centreX = (input.cols / 2) + radius;
+	if (D.angle == 75) {
+		// Straight Line
+		line(circleImg, Point(input.cols / 2, 0), Point(input.cols / 2, input.rows), Scalar(0, 0, 255), 1);
 	}
-	else if (D.angle < 75) {
-		centreX = (input.cols / 2) - radius;
+	else {
+		int centreX = 0;
+		if (D.angle > 75) {
+			centreX = (input.cols / 2) + radius;
+		}
+		else if (D.angle < 75) {
+			centreX = (input.cols / 2) - radius;
+		}
+		circle(circleImg, Point(centreX, input.rows), radius, Scalar(0, 0, 255), 1);
 	}
-	circle(circleImg, Point(centreX, input.rows), radius, Scalar(100, 100, 100), 1);
+
 
 	// Draw an image
 	imshow("lanedetection", circleImg);
@@ -368,7 +388,7 @@ int setSpeed(int angle) {
 }
 
 /* Process the determined directions and send them to the motor
-	use the motor serial classes made by duncan.
+use the motor serial classes made by duncan.
 
 */
 int processDirections(Directions& D) {
@@ -380,7 +400,6 @@ int processDirections(Directions& D) {
 	return 0;
 }
 
-*/
 /* direction 0 both directions, 1 left, 2 right.
 */
 vector<Point> findPoints(vector<vector<Point> > contours, Point midPoint) {
@@ -392,8 +411,8 @@ vector<Point> findPoints(vector<vector<Point> > contours, Point midPoint) {
 		if (midPoint.y <= newContours[i].hyBound.y && midPoint.y >= newContours[i].lyBound.y) {
 			selectedPoints.push_back(intersection(newContours[i].contour, midPoint));
 		}
-			
-	}	
+
+	}
 	return selectedPoints;
 }
 
@@ -411,8 +430,9 @@ vector<SingleContour>  outerBounds(vector<vector<Point> >& contours) {
 		{
 			if (lyBound.y == -1) {
 				lyBound = contours[i][j];
-			}else if (contours[i][j].y >= lyBound.y) {
-					lyBound = contours[i][j];
+			}
+			else if (contours[i][j].y >= lyBound.y) {
+				lyBound = contours[i][j];
 			}
 			if (hyBound.y == -1) {
 				hyBound = contours[i][j];
@@ -426,7 +446,7 @@ vector<SingleContour>  outerBounds(vector<vector<Point> >& contours) {
 			}
 			else if (contours[i][j].x <= lxBound.x) {
 				lxBound = contours[i][j];
-			}	
+			}
 			if (hxBound.x == -1) {
 				hxBound = contours[i][j];
 			}
@@ -461,87 +481,169 @@ Point intersection(vector<Point> contour, Point midPoint) {
 	}
 	return output;
 }
-
 vector<Point>  contourBounds(vector<vector<Point> >& contours, Mat& input, double& left, double& right) {
 	Mat singleContour(frameSize, CV_8U);
-	int Ca1 = 0, Ca2 = 0, Cb1 = 0, Cb2 = 0, Cc1 = 0, Cc2 = 0, Cd1 = 0, Cd2 = 0;
-	Rect Ra1(0, frameSize.height / 2, frameSize.width / 4, frameSize.height / 4);
-	Rect Ra2(frameSize.width / 4, frameSize.height / 2, frameSize.width / 4, frameSize.height / 4);
-	Rect Rb1(0, (frameSize.height / 4) * 3, frameSize.width / 4, frameSize.height / 4);
-	Rect Rb2(frameSize.width / 4, (frameSize.height / 4) * 3, frameSize.width / 4, frameSize.height / 4);
+	int Ca1 = 0,
+		Ca2 = 0,
+		Ca3 = 0,
+		Ca4 = 0,
+		Cb1 = 0,
+		Cb2 = 0,
+		Cb3 = 0,
+		Cb4 = 0,
+		Cc1 = 0,
+		Cc2 = 0,
+		Cc3 = 0,
+		Cc4 = 0,
+		Cd1 = 0,
+		Cd2 = 0,
+		Cd3 = 0,
+		Cd4 = 0;
 
-	Rect Rc1((frameSize.width / 4) * 3, frameSize.height / 2, frameSize.width / 4, frameSize.height / 4);
-	Rect Rc2(frameSize.width / 2, frameSize.height / 2, frameSize.width / 4, frameSize.height / 4);
-	Rect Rd1((frameSize.width / 4) * 3, (frameSize.height / 4) * 3, frameSize.width / 4, frameSize.height / 4);
-	Rect Rd2(frameSize.width / 2, (frameSize.height / 4) * 3, frameSize.width / 4, frameSize.height / 4);
+	// First row of rectangles
+	Rect Ra1((frameSize.width / 8) * 0, (frameSize.height / 4) * 2, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Ra2((frameSize.width / 8) * 1, (frameSize.height / 4) * 2, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Ra3((frameSize.width / 8) * 2, (frameSize.height / 4) * 2, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Ra4((frameSize.width / 8) * 3, (frameSize.height / 4) * 2, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rb4((frameSize.width / 8) * 4, (frameSize.height / 4) * 2, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rb3((frameSize.width / 8) * 5, (frameSize.height / 4) * 2, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rb2((frameSize.width / 8) * 6, (frameSize.height / 4) * 2, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rb1((frameSize.width / 8) * 7, (frameSize.height / 4) * 2, (frameSize.width / 8), (frameSize.height / 4));
+
+	// Second row of rectangles
+	Rect Rc1((frameSize.width / 8) * 0, (frameSize.height / 4) * 3, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rc2((frameSize.width / 8) * 1, (frameSize.height / 4) * 3, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rc3((frameSize.width / 8) * 2, (frameSize.height / 4) * 3, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rc4((frameSize.width / 8) * 3, (frameSize.height / 4) * 3, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rd4((frameSize.width / 8) * 4, (frameSize.height / 4) * 3, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rd3((frameSize.width / 8) * 5, (frameSize.height / 4) * 3, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rd2((frameSize.width / 8) * 6, (frameSize.height / 4) * 3, (frameSize.width / 8), (frameSize.height / 4));
+	Rect Rd1((frameSize.width / 8) * 7, (frameSize.height / 4) * 3, (frameSize.width / 8), (frameSize.height / 4));
+
 
 	vector<Point> circles;
 	int spacing = 10;
 	for (int i = 0; i < contours.size(); i++) {
 		for (int j = 0; j < contours[i].size(); j++)
 		{
-			
-			if (contours[i][j].y % spacing == 0 && contours[i][j].y > input.rows /2 ) {
+			if (contours[i][j].y % spacing == 0 && contours[i][j].y > input.rows / 2) {
 				//double Rsqr = leastSqrRegression(contours[i]);
 				//if (Rsqr >= 0.9)
-					//drawContours(singleContour, contours, i, Scalar(255, 255, 255), 1);
+				//drawContours(singleContour, contours, i, Scalar(255, 255, 255), 1);
 				if (Ra1.contains(contours[i][j]))
 					Ca1++;
 				else if (Ra2.contains(contours[i][j]))
 					Ca2++;
+				else if (Ra3.contains(contours[i][j]))
+					Ca3++;
+				else if (Ra4.contains(contours[i][j]))
+					Ca4++;
 				else if (Rb1.contains(contours[i][j]))
 					Cb1++;
 				else if (Rb2.contains(contours[i][j]))
 					Cb2++;
+				else if (Rb3.contains(contours[i][j]))
+					Cb3++;
+				else if (Rb4.contains(contours[i][j]))
+					Cb4++;
 				else if (Rc1.contains(contours[i][j]))
 					Cc1++;
 				else if (Rc2.contains(contours[i][j]))
 					Cc2++;
+				else if (Rc3.contains(contours[i][j]))
+					Cc3++;
+				else if (Rc4.contains(contours[i][j]))
+					Cc4++;
 				else if (Rd1.contains(contours[i][j]))
 					Cd1++;
 				else if (Rd2.contains(contours[i][j]))
 					Cd2++;
+				else if (Rd3.contains(contours[i][j]))
+					Cd3++;
+				else if (Rd3.contains(contours[i][j]))
+					Cd3++;
 				circles.push_back(contours[i][j]);
 			}
 		}
 	}
-	
-	// Adding weights to counts
-	int wa1 = 1;
-	int wa2 = 3;
-	int wb1 = 2;
-	int wb2 = 5;
-	int wc1 = 1;
-	int wc2 = 3;
-	int wd1 = 2;
-	int wd2 = 5;
+
+	// Initialising weights to 0
+	int wa1 = 0, wa2 = 0, wa3 = 0, wa4 = 0, wb1 = 0, wb2 = 0, wb3 = 0, wb4 = 0, wc1 = 0, wc2 = 0, wc3 = 0, wc4 = 0, wd1 = 0, wd2 = 0, wd3 = 0, wd4 = 0;
 
 
-	// Weighted quads
-	 Ca1 *= wa1;
-	 Ca2 *= wa2;
-	 Cb1 *= wb1;
-	 Cb2 *= wb2;
-	 Cc1 *= wc1;
-	 Cc2 *= wc2;
-	 Cd1 *= wd1;
-	 Cd2 *= wd2;
+	// Choose weighting scheme
+	int scheme = 1;
+	switch (scheme) {
+	case 1:
+		wa1 = 1;
+		wa2 = 2;
+		wa3 = 3;
+		wa4 = 5;
+		wb4 = 5;
+		wb3 = 3;
+		wb2 = 2;
+		wb1 = 1;
+		wc1 = 2;
+		wc2 = 3;
+		wc3 = 5;
+		wc4 = 8;
+		wd4 = 8;
+		wd3 = 5;
+		wd2 = 3;
+		wd1 = 2;
+		break;
+	default:
+		wa1 = 1;
+		wa2 = 1;
+		wa3 = 3;
+		wa4 = 3;
+		wb4 = 3;
+		wb3 = 3;
+		wb2 = 1;
+		wb1 = 1;
+		wc1 = 2;
+		wc2 = 2;
+		wc3 = 5;
+		wc4 = 5;
+		wd4 = 5;
+		wd3 = 5;
+		wd2 = 2;
+		wd1 = 2;
+	}
+	// Weighted Sectors
+	Ca1 *= wa1;
+	Ca2 *= wa2;
+	Ca3 *= wa3;
+	Ca4 *= wa4;
+	Cb1 *= wb1;
+	Cb2 *= wb2;
+	Cb3 *= wb3;
+	Cb4 *= wb4;
+	Cc1 *= wc1;
+	Cc2 *= wc2;
+	Cc3 *= wc3;
+	Cc4 *= wc4;
+	Cd1 *= wd1;
+	Cd2 *= wd2;
+	Cd3 *= wd3;
+	Cd4 *= wd4;
 
 	// Average the left/right
-	left = (Ca1 + Ca2 + Cb1 + Cb2) / 4;
-	right = (Cc1 + Cc2 + Cd1 + Cd2) / 4;
-	cout << left << " " << right << " " << left-right<<endl;
+	left = (Ca1 + Ca2 + Ca3 + Ca4 + Cc1 + Cc2 + Cc3 + Cc4) / 8;
+	right = (Cb1 + Cb2 + Cb3 + Cb4 + Cd1 + Cd2 + Cd3 + Cd4) / 8;
+	cout << left << " " << right << " " << left - right << endl;
 	//	imshow("singleContour", singleContour);
 	cout << Ca1 << " " << Ca2 << " " << Cb1 << " " << Cb2 << " " << Cc1 << " " << Cc2 << " " << Cd1 << " " << Cd2 << " " << endl;
 
 	return circles;
 }
+
 /*
 send the directions determined by the processor back to the pi.
 The returnClient is defined at the start of the program.
 TODO add the client it is supposed to use to this function to make it more independant.
 */
-void emitDirections(Directions& D){
+void emitDirections(Directions& D) {
 	std::ostringstream oss;
 	oss << D.angle << ":" << D.speed;
 	string message = oss.str();
