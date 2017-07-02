@@ -43,7 +43,7 @@ int returnPort = 5001;
 
 
 // Debug
-bool debug = false;
+bool debug = true;
 
 // Ryoma's Functions
 int convertTurningAngle(double angle);
@@ -52,7 +52,7 @@ double turningRadius(double angle);
 double turningAngle(int left, int right);
 
 // Ryoma's Variables
-int refreshRate = 10;							// How many frames until next decision?
+int refreshRate = 1;							// How many frames until next decision?
 
 UDPClient *returnClient = new UDPClient(returnAddr, returnPort);
 
@@ -103,6 +103,7 @@ vector<Point> findPoints(vector<vector<Point> > contours, Point midPoint);
 Point intersection(vector<Point> contour, Point midPoint);
 vector<Point>  contourBounds(vector<vector<Point> >& contours, Mat& input, double& left, double& right);
 void emitDirections(Directions& d);
+int angleConversion(int input);
 FuzzyColor fuzzyColor;
 Size frameSize;
 
@@ -319,7 +320,8 @@ void laneDetect(Mat& input, Directions& D, Sectors& S) {
 	}
 
 	// 75 Deg = straight. 
-	//D.angle = 75;
+	
+	/*
 	if (S.fCount < refreshRate) {
 		S.fCount++;
 		// Simplify by using linear weights
@@ -336,14 +338,19 @@ void laneDetect(Mat& input, Directions& D, Sectors& S) {
 		S.left = 0;
 		S.right = 0;
 	}
+	
 
 	D.angle = turningAngle(S.dLeft, S.dRight);
 	D.speed = setSpeed(D.angle);
 
+	*/
+	D.angle = turningAngle(left, right);
+	D.speed = 100;
 	int radius = turningRadius(D.angle);
 	double scale = 14.2222;						// Magic number!
 	radius *= scale;
 
+	cout << "Left: " << left << " || Right: " << right << endl;
 	/*
 	cout << "S.fCount: " << S.fCount << endl;
 	cout << "D.angle: " << D.angle << endl;
@@ -394,7 +401,7 @@ int convertTurningAngle(double angle) {
 	int result = 75;			// Centre is at 75 degrees
 	int min = 20;				// Furthest left the car can turn
 	int max = 130;				// Furthest right the car can turn
-	if (angle < 0) {
+	if (angle < result) {
 		result -= abs(angle);	// Left turn
 		if (result <= min)
 			result = min;
@@ -404,6 +411,8 @@ int convertTurningAngle(double angle) {
 		if (result >= max)
 			result = max;
 	}
+
+	cout << "convertTurningAngle(): " << result << endl;
 	return result;
 }
 /*
@@ -415,6 +424,16 @@ double turningAngle(int left, int right) {
 	double result = 0.0;
 
 	// Something simple...
+	if (left == 0 && right == 0){
+		// Go straight
+		result = 75;
+	} else if (left == 0 && right > 0){
+		result = 75 - abs(left - right);
+		cout << "Turn left: " << result << endl;
+	} else {
+		result = 75 + abs(left - right); 
+	}
+	/*
 	if (left != 0 && right != 0) {
 		cout << "Left: " << left << " || Right: " << right << endl;
 		result = left - right;
@@ -423,6 +442,7 @@ double turningAngle(int left, int right) {
 		// Go straight
 		result = 75;
 	}
+	*/
 	result = convertTurningAngle(result);
 	return result;
 }
@@ -654,10 +674,10 @@ vector<Point>  contourBounds(vector<vector<Point> >& contours, Mat& input, doubl
 		wb1 = 1;
 		wc1 = 2;
 		wc2 = 3;
-		wc3 = 5;
-		wc4 = 8;
-		wd4 = 8;
-		wd3 = 5;
+		wc3 = 0;
+		wc4 = 0;
+		wd4 = 0;
+		wd3 = 0;
 		wd2 = 3;
 		wd1 = 2;
 		break;
@@ -714,7 +734,9 @@ TODO add the client it is supposed to use to this function to make it more indep
 */
 void emitDirections(Directions& D) {
 	std::ostringstream oss;
-	oss << D.angle << "," << D.speed;
+	int angle = angleConversion(D.angle);
+	int speed = 100; // D.speed
+	oss << angle << "," << speed;
 	string message = oss.str();
 	std::vector<uchar> buff(message.c_str(), message.c_str() + message.length() + 1);
 	int returnResult = returnClient->sendData((char*)(&buff[0]), buff.size());
@@ -723,4 +745,12 @@ void emitDirections(Directions& D) {
 	else
 		cout << message << endl;
 
+}
+int angleConversion(int input) {
+	int result;
+
+	int temp = input - 75;
+	result = 75 - temp;
+
+	return result;
 }
