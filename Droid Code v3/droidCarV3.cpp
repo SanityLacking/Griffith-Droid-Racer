@@ -7,6 +7,8 @@
 #include "opencv2/opencv.hpp"
 #include <iostream>
 #include <numeric>
+#include <sstream>
+#include <string>
 
 
 // Maths!
@@ -48,7 +50,9 @@ int convertTurningAngle(double angle);
 int setSpeed(int angle);
 double turningRadius(double angle);
 double turningAngle(int left, int right);
-int fCount = 0;
+
+// Ryoma's Variables
+int refreshRate = 10;							// How many frames until next decision?
 
 UDPClient *returnClient = new UDPClient(returnAddr, returnPort);
 
@@ -61,7 +65,11 @@ struct Directions {
 };
 
 struct Sectors {
-	int Cca1 = 0;
+	int fCount = 0;
+	double left = 0;
+	double right = 0;
+	double dLeft = 0;
+	double dRight = 0;
 };
 
 
@@ -86,10 +94,10 @@ public:
 double leastSqrRegression(vector<Point> xyCollection);
 vector<SingleContour>  outerBounds(vector<vector<Point> >& contours);
 int processVideo(VideoCapture& Camera);
-int processVideo();
+int processVideo(Sectors& S);
 //int processVideo(SocketReceive &socket);
-int processImage(Mat& frame);
-void laneDetect(Mat& input, Directions& D);
+int processImage(Mat& frame, Sectors& S);
+void laneDetect(Mat& input, Directions& D, Sectors& S);
 int processDirections(Directions& D);
 vector<Point> findPoints(vector<vector<Point> > contours, Point midPoint);
 Point intersection(vector<Point> contour, Point midPoint);
@@ -101,10 +109,11 @@ Size frameSize;
 int main(int argc, char** argv)
 {
 	VideoCapture cap;
-	processVideo();
+	Sectors S;
+	processVideo(S);
 	return 0;
 }
-int processVideo() {
+int processVideo(Sectors& S) {
 	cout << "=== VIDEO RECEIVER ===" << endl;
 
 	//setup UDP client for recieving
@@ -131,20 +140,20 @@ int processVideo() {
 		Mat jpegimage = imdecode(Mat(videoBuffer), CV_LOAD_IMAGE_COLOR);
 		IplImage img = jpegimage;
 		cvShowImage("UDP Video Receiver", &img);
-		processImage(jpegimage);
+		processImage(jpegimage, S);
 
 
 		waitKey(1);
 	}
 	return 0;
 }
-int processVideo(VideoCapture& camera) {
+int processVideo(VideoCapture& camera, Sectors& S) {
 	for (;;)
 	{
 		Mat frame; // matrix container for image frame
 		camera >> frame; //grab the next frame of video in sequence
 		if (frame.empty()) break; // end of video stream
-		processImage(frame);
+		processImage(frame, S);
 		if (waitKey(1) == 27) break; // stop capturing by pressing ESC 
 	}
 	return 0;
@@ -163,7 +172,7 @@ perform edge detection method: sobel, canny or other?
 map between lines
 
 */
-int processImage(Mat& frame) {
+int processImage(Mat& frame, Sectors& S) {
 
 	//while (true) {
 	//frame = imread("screenshots/light.png");
@@ -216,7 +225,7 @@ int processImage(Mat& frame) {
 	if (debug)
 		imshow("fuzzyEdges", fuzzyEdges);
 	Directions D;
-	laneDetect(fuzzyEdges, D);
+	laneDetect(fuzzyEdges, D, S);
 	emitDirections(D);
 
 
@@ -244,7 +253,7 @@ output the driving instructions to the Struct
 
 */
 
-void laneDetect(Mat& input, Directions& D) {
+void laneDetect(Mat& input, Directions& D, Sectors& S) {
 	Mat circleImg(frameSize, CV_8UC3);
 	circleImg.setTo(Scalar(0, 0, 0));						// Set bg of image
 	int st = input.cols;
@@ -311,26 +320,36 @@ void laneDetect(Mat& input, Directions& D) {
 
 	// 75 Deg = straight. 
 	//D.angle = 75;
-	if (fCount < 5) {
-		fCount++;
+	if (S.fCount < refreshRate) {
+		S.fCount++;
+		// Simplify by using linear weights
+		S.left += left * S.fCount;
+		S.right += right * S.fCount;
 	}
 	else {
-		D.angle = turningAngle(left, right);
-		D.speed = setSpeed(D.angle);
-
+		// Update directions
+		S.dLeft = S.left / S.fCount;
+		S.dRight = S.right / S.fCount;
 
 		// Reset fCount
-		fCount = 0;
+		S.fCount = 0;
+		S.left = 0;
+		S.right = 0;
 	}
 
+	D.angle = turningAngle(S.dLeft, S.dRight);
+	D.speed = setSpeed(D.angle);
 
 	int radius = turningRadius(D.angle);
 	double scale = 14.2222;						// Magic number!
 	radius *= scale;
 
+	/*
+	cout << "S.fCount: " << S.fCount << endl;
 	cout << "D.angle: " << D.angle << endl;
 	cout << "D.speed: " << D.speed << endl;
 	cout << "raidus: " << radius << endl;
+	//*/
 	if (D.angle == 75) {
 		// Straight Line
 		line(circleImg, Point(input.cols / 2, 0), Point(input.cols / 2, input.rows), Scalar(0, 0, 255), 1);
@@ -345,6 +364,25 @@ void laneDetect(Mat& input, Directions& D) {
 		}
 		circle(circleImg, Point(centreX, input.rows), radius, Scalar(0, 0, 255), 1);
 	}
+
+	// Add some text to img
+	double fontSize = 0.5;
+	int padding = 10;
+	ostringstream oss;
+	oss << "Decision Rate: " << refreshRate;
+	String text = oss.str();
+
+	Size textSize = getTextSize(text, FONT_HERSHEY_SIMPLEX, fontSize, 1, false);
+	Point textOrg(0, textSize.height);
+	putText(circleImg, text, textOrg, FONT_HERSHEY_SIMPLEX, fontSize, Scalar(255, 255, 255));
+
+	ostringstream oss2;
+	oss2 << "Angle: " << D.angle;
+	text = oss2.str();
+	textSize = getTextSize(text, FONT_HERSHEY_SIMPLEX, fontSize, 1, false);
+	Point textOrg2(0, textSize.height * 2 + padding);
+	putText(circleImg, text, textOrg2, FONT_HERSHEY_SIMPLEX, fontSize, Scalar(255, 255, 255));
+
 
 	// Draw an image
 	imshow("lanedetection", circleImg);
