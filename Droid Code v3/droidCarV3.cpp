@@ -39,13 +39,15 @@ char *addr = "127.0.0.1";
 int UDPMAX = 65507;
 int port = 5000;
 
-char *returnAddr = "192.168.0.109";
+char *returnAddr = "192.168.1.143"; //old address
+//char *returnAddr = "192.168.0.27";
 int returnPort = 5001;
 
 FILE *file;
 
 // Debug
 bool debug = true;
+bool localCam = false;
 
 // Ryoma's Functions
 int convertTurningAngle(double angle);
@@ -122,7 +124,6 @@ int main(int argc, char** argv)
 
 
 	//SerialPort arduino(port_name);
-	VideoCapture cap;
 	Sectors S;
 	processVideo(S);
 	return 0;
@@ -133,31 +134,43 @@ int processVideo(Sectors& S) {
 	//setup UDP client for recieving
 	UDPClient *client = new UDPClient(port);
 	char *buff = (char*)malloc(UDPMAX);
-
-
-
+	VideoCapture cap;
+	if (localCam){
+		cap.open(0);
+	}
+	
 	vector<uchar> videoBuffer;
 
 	while (1) {
 		//read data
-		int result = client->receiveData(buff, UDPMAX);
-		if (result < 0) {
-			cout << "Failed to receive frame." << endl;
-			continue;
+		if (!localCam){
+			int result = client->receiveData(buff, UDPMAX);
+			if (result < 0) {
+				cout << "Failed to receive frame." << endl;
+				continue;
+			}
+			cout << "Got a frame of size " << result << endl;
+
+			videoBuffer.resize(result);
+			memcpy((char*)(&videoBuffer[0]), buff, result);
+
+			//reconstruct jpeg and display it
+			Mat jpegimage = imdecode(Mat(videoBuffer), CV_LOAD_IMAGE_COLOR);
+			IplImage img = jpegimage;
+			cvShowImage("UDP Video Receiver", &img);
+
+			processImage(jpegimage, S);
+
+
+			waitKey(1);
 		}
-		cout << "Got a frame of size " << result << endl;
+		else {
+			Mat frame;
+			cap >> frame;
 
-		videoBuffer.resize(result);
-		memcpy((char*)(&videoBuffer[0]), buff, result);
-
-		//reconstruct jpeg and display it
-		Mat jpegimage = imdecode(Mat(videoBuffer), CV_LOAD_IMAGE_COLOR);
-		IplImage img = jpegimage;
-		cvShowImage("UDP Video Receiver", &img);
-		processImage(jpegimage, S);
-
-
-		waitKey(1);
+			processImage(frame, S);
+			waitKey(1);
+		}
 	}
 	return 0;
 }
@@ -216,42 +229,47 @@ int processImage(Mat& frame, Sectors& S) {
 	//	imshow("frame", frame);
 	Mat edges, frame_thresholdBlue, frame_thresholdYellow, frame_hsv;
 	Mat element = getStructuringElement(MORPH_RECT, Size(3, 3), Point(2, 2));
-
-	Mat fuzzyImg, fuzzyEdges;
-	//fuzzyColor.processFuzzyColor(frame, fuzzyImg);
+	
+	Mat fuzzyImg, fuzzyImgRight, fuzzyImgLeft, fuzzyEdges;
+	fuzzyColor.processFuzzyColor(frame, fuzzyImg);
 	/*
 	Mat leftCornerRect(frame, Rect(frameSize.width * 0, frameSize.height / 2, frameSize.width/2, frameSize.height/2));
 	Mat rightCornerRect(frame, Rect(frameSize.width /2, frameSize.height / 2, frameSize.width / 2, frameSize.height / 2));
-	imshow("left", leftCornerRect);
-	imshow("right", rightCornerRect);
-	fuzzyColor.processSingleFuzzyColor(frame, fuzzyImg, "blue");
-	fuzzyColor.processSingleFuzzyColor(frame, fuzzyImg, "yellow");
+
+	fuzzyColor.processSingleFuzzyColor(leftCornerRect, fuzzyImgLeft, "yellow");
+	fuzzyColor.processSingleFuzzyColor(rightCornerRect, fuzzyImgRight, "blue");
+	Mat fuzzyImg2(frame.size(), CV_8UC3);
+
+	imshow("left", fuzzyImgLeft);
+	imshow("right", fuzzyImgRight);
+	fuzzyImgLeft.copyTo(fuzzyImg2(cv::Rect(frameSize.width * 0, frameSize.height / 2, fuzzyImgLeft.cols, fuzzyImgLeft.rows)));
+	fuzzyImgRight.copyTo(fuzzyImg2(cv::Rect(frameSize.width / 2, frameSize.height / 2, fuzzyImgRight.cols, fuzzyImgRight.rows)));
+	//imshow("fuzzy2", fuzzyImg2);
 	*/
-	fuzzyColor.processFuzzyColor(frame, fuzzyImg);
-	if (debug)
-		imshow("fuzzyColor", fuzzyImg);
-	cvtColor(fuzzyImg, fuzzyEdges, COLOR_BGR2GRAY);
-	blur(fuzzyEdges, fuzzyEdges, Size(3, 3));
-	dilate(fuzzyEdges, fuzzyEdges, element, Point(1, 1), 2);
+	//fuzzyColor.processFuzzyColor(frame, fuzzyImg);
+	//if (debug)
+	//	imshow("fuzzyColor", fuzzyImg);
+	//cvtColor(fuzzyImg, fuzzyEdges, COLOR_BGR2GRAY);
+	//blur(fuzzyEdges, fuzzyEdges, Size(3, 3));
+	//dilate(fuzzyEdges, fuzzyEdges, element, Point(1, 1), 2);
 
 
-	cvtColor(frame, frame_hsv, COLOR_BGR2HSV);
-	cvtColor(frame, edges, COLOR_BGR2GRAY);
+	//cvtColor(frame, frame_hsv, COLOR_BGR2HSV);
+	//cvtColor(frame, edges, COLOR_BGR2GRAY);
 
-
+	/*
 	inRange(frame_hsv, Scalar(92, 60, 40), Scalar(124, 256, 256), frame_thresholdBlue);
 	erode(frame_thresholdBlue, frame_thresholdBlue, element, Point(1, 1), 1);
 	inRange(frame_hsv, Scalar(20, 90, 160), Scalar(60, 256, 256), frame_thresholdYellow);
 
-	//imshow("thresholdBlue", frame_thresholdBlue); // display the frame for the user to view
-
-	//	imshow("thresholdYellow", frame_thresholdYellow); // display the frame for the user to view
+	imshow("thresholdBlue", frame_thresholdBlue); // display the frame for the user to view
+		imshow("thresholdYellow", frame_thresholdYellow); // display the frame for the user to view
 
 	GaussianBlur(edges, edges, Size(7, 7), 1.5, 1.5);
 	Canny(edges, edges, 0, 30, 3);
 	if (debug)
 		imshow("edges", edges); // display the frame for the user to view
-
+	
 	Mat bitwiseImg;
 	//bitwise_or(frame_thresholdBlue, frame_thresholdYellow, bitwiseImg);
 	//erode(bitwiseImg, bitwiseImg, element, Point(1, 1), 1);
@@ -265,8 +283,9 @@ int processImage(Mat& frame, Sectors& S) {
 	bitwise_and(fuzzyEdges, edges, fuzzyEdges);
 	if (debug)
 		imshow("fuzzyEdges", fuzzyEdges);
+		*/
 	Directions D;
-	laneDetect(fuzzyEdges, D, S);
+	laneDetect(frame, D, S);
 	emitDirections(D);
 
 
@@ -339,14 +358,59 @@ void laneDetect(Mat& input, Directions& D, Sectors& S) {
 	rectangle(circleImg, Rd3, Scalar(255, 255, 255));
 	rectangle(circleImg, Rd4, Scalar(255, 255, 255));
 
+	Mat fuzzyImg, fuzzyImgRight, fuzzyImgLeft, fuzzyEdges;
+	//fuzzyColor.processFuzzyColor(frame, fuzzyImg);
+
+	Mat leftCornerRect(input, Rect(frameSize.width * 0, frameSize.height / 2, frameSize.width / 2, frameSize.height / 2));
+	Mat rightCornerRect(input, Rect(frameSize.width / 2, frameSize.height / 2, frameSize.width / 2, frameSize.height / 2));
+
+	fuzzyColor.processSingleFuzzyColor(leftCornerRect, fuzzyImgLeft, "yellow");
+	fuzzyColor.processSingleFuzzyColor(rightCornerRect, fuzzyImgRight, "blue");
+	Mat fuzzyImg2(input.size(), CV_8UC3);
+
+	Mat fuzzyEdgesLeft, fuzzyEdgesRight;
+	cvtColor(fuzzyImgLeft, fuzzyEdgesLeft, COLOR_BGR2GRAY);
+	cvtColor(fuzzyImgRight, fuzzyEdgesRight, COLOR_BGR2GRAY);
+	imshow("left", fuzzyEdgesLeft);
+	imshow("right", fuzzyEdgesRight);
+	fuzzyImgLeft.copyTo(fuzzyImg2(cv::Rect(frameSize.width * 0, frameSize.height / 2, fuzzyImgLeft.cols, fuzzyImgLeft.rows)));
+	fuzzyImgRight.copyTo(fuzzyImg2(cv::Rect(frameSize.width / 2, frameSize.height / 2, fuzzyImgRight.cols, fuzzyImgRight.rows)));
+	//imshow("fuzzy2", fuzzyImg2);
 	std::vector<std::vector<Point> > contours;
+	
+	std::vector<std::vector<Point> > contoursLeft;
 	std::vector<Vec4i> hierarchy;
-	findContours(input, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+	findContours(fuzzyEdgesLeft, contoursLeft, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 	vector<vector<Point> > intersections;
+	for (size_t i = 0; i < contoursLeft.size(); i++)
+	{
+		for (size_t j = 0; j < contoursLeft[i].size(); j++)
+		{
+			contoursLeft[i][j].x +=frameSize.width * 0;
+			contoursLeft[i][j].y +=frameSize.height / 2;
+		}
+	}
+
+	
+	std::vector<std::vector<Point> > contoursRight;
+	std::vector<Vec4i> hierarchy2;
+	findContours(fuzzyEdgesRight, contoursRight, hierarchy2, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+//	vector<vector<Point> > intersections;
+	for (size_t i = 0; i < contoursRight.size(); i++)
+	{
+		for (size_t j = 0; j < contoursRight[i].size(); j++)
+		{
+			contoursRight[i][j].x +=frameSize.width / 2;
+			contoursRight[i][j].y +=frameSize.height / 2;
+		}
+	}
+
 
 	double left = 0;
 	double right = 0;
-	vector<Point> circles = contourBounds(contours, input, left, right);
+	vector<Point> circles = contourBounds(contoursLeft, input, left, right);
+	vector<Point> circles2 = contourBounds(contoursRight, input, left, right);
+	circles.insert(circles.end(),circles2.begin(),circles2.end());
 	for (int i = 0; i < circles.size(); i++)
 	{
 		circle(circleImg, circles[i], 1, Scalar(255, 255, 255), 2);
@@ -483,30 +547,28 @@ int convertTurningAngle(double angle) {
 turningAngle() will calculate how much we need to turn left or right according to the dot density from filters
 Negative angle = left turn
 Positive angle = right turn
-*/
+*/// Calculate the absolute turning angle. This function assumes that 20 deg => left, 130 deg => right.
 double turningAngle(int left, int right) {
 	double result = 0.0;
+	double difference = abs(left - right);
+	double multiplier = 2;
 
-	// Something simple...
-	if (left == 0 && right == 0){
+	// This new code will take into consideration the cases where there are even weight
+	// distribution on both left and right sides. 
+	if ((left == 0 && right == 0) || left == right){
 		// Go straight
 		result = 75;
-	} else if (left == 0 && right > 0){
-		result = 75 - abs(left - right);
-		cout << "Turn left: " << result << endl;
-	} else {
-		result = 75 + abs(left - right); 
-	}
-	/*
-	if (left != 0 && right != 0) {
-		cout << "Left: " << left << " || Right: " << right << endl;
-		result = left - right;
 	}
 	else {
-		// Go straight
-		result = 75;
+		if (left > right){
+			// Turn left
+			result = 75 - (difference * multiplier);
+		}
+		else if (right > left){
+			// Turn right
+			result = 75 + (difference * multiplier);
+		}
 	}
-	*/
 	cout << "turningAngle(): " << result << endl;
 	result = convertTurningAngle(result);
 	return result;
@@ -724,27 +786,27 @@ vector<Point>  contourBounds(vector<vector<Point> >& contours, Mat& input, doubl
 	// Initialising weights to 0
 	int wa1 = 0, wa2 = 0, wa3 = 0, wa4 = 0, wb1 = 0, wb2 = 0, wb3 = 0, wb4 = 0, wc1 = 0, wc2 = 0, wc3 = 0, wc4 = 0, wd1 = 0, wd2 = 0, wd3 = 0, wd4 = 0;
 
-
+	int yellowMod = 2;
 	// Choose weighting scheme
 	int scheme = 1;
 	switch (scheme) {
 	case 1:
-		wa1 = 1;
-		wa2 = 2;
-		wa3 = 3;
-		wa4 = 5;
-		wb4 = 5;
+		wa1 = 2 * yellowMod;
+		wa2 = 3 * yellowMod;
+		wa3 = 4 * yellowMod;
+		wa4 = 7 * yellowMod;
+		wb4 = 3;
 		wb3 = 3;
 		wb2 = 2;
-		wb1 = 1;
-		wc1 = 2;
-		wc2 = 3;
-		wc3 = 0;
-		wc4 = 0;
-		wd4 = 0;
-		wd3 = 0;
-		wd2 = 3;
-		wd1 = 2;
+		wb1 = 2;
+		wc1 = 3 * yellowMod;
+		wc2 = 3 * yellowMod;
+		wc3 = 4 * yellowMod;
+		wc4 = 7 * yellowMod;
+		wd4 = 4;
+		wd3 = 4;
+		wd2 = 6;
+		wd1 = 3;
 		break;
 	default:
 		wa1 = 1;
@@ -783,8 +845,8 @@ vector<Point>  contourBounds(vector<vector<Point> >& contours, Mat& input, doubl
 	Cd4 *= wd4;
 
 	// Average the left/right
-	left = (Ca1 + Ca2 + Ca3 + Ca4 + Cc1 + Cc2 + Cc3 + Cc4) / 8;
-	right = (Cb1 + Cb2 + Cb3 + Cb4 + Cd1 + Cd2 + Cd3 + Cd4) / 8;
+	left += (Ca1 + Ca2 + Ca3 + Ca4 + Cc1 + Cc2 + Cc3 + Cc4) / 8;
+	right += (Cb1 + Cb2 + Cb3 + Cb4 + Cd1 + Cd2 + Cd3 + Cd4) / 8;
 	cout << left << " " << right << " " << left - right << endl;
 	//	imshow("singleContour", singleContour);
 	cout << Ca1 << " " << Ca2 << " " << Cb1 << " " << Cb2 << " " << Cc1 << " " << Cc2 << " " << Cd1 << " " << Cd2 << " " << endl;

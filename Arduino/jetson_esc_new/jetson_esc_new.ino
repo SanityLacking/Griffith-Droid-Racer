@@ -95,14 +95,14 @@ void processInput(){
   
   //checkcommand();
   steer.write(angle);
-  if (count == 1){
-    esc.write(power);
+  if (count <=3){
+    esc.write(100);
     count++;
     
   }else{
     esc.write(0);
     count++;
-    count = count % 10;
+    count = count % 7;
   }
   
   delay(50);
