@@ -25,7 +25,9 @@ int main()
     if (port < 0) {
     return -1;
     }
-    std::string ip_address = "192.168.0.111";  // Localhost
+    //std::string ip_address = "192.168.0.22";  // old Localhost
+    //std::string ip_address = "10.100.1.102";  // Localhost
+    std::string ip_address = "192.168.1.122";  // Localhost
     const SenderSocket socket(ip_address, port);
     std::cout << "Sending to " << ip_address << " on port " << port << "." << std::endl;
 

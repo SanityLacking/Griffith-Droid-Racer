@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1498901141 source:/home/pi/c++/SocketVideo/SocketVideo/main.cpp
+1499096439 source:/home/pi/c++/SocketVideo/SocketVideo/main.cpp
 	"opencv2/objdetect/objdetect.hpp"
 	"opencv2/highgui/highgui.hpp"
 	"opencv2/imgproc/imgproc.hpp"

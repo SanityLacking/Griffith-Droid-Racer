@@ -228,7 +228,6 @@ int processImage(Mat& frame, Sectors& S) {
 	//if (debug)
 	//	imshow("frame", frame);
 	Mat edges, frame_thresholdBlue, frame_thresholdYellow, frame_hsv;
-	Mat element = getStructuringElement(MORPH_RECT, Size(3, 3), Point(2, 2));
 	
 	Mat fuzzyImg, fuzzyImgRight, fuzzyImgLeft, fuzzyEdges;
 	fuzzyColor.processFuzzyColor(frame, fuzzyImg);
@@ -371,6 +370,15 @@ void laneDetect(Mat& input, Directions& D, Sectors& S) {
 	Mat fuzzyEdgesLeft, fuzzyEdgesRight;
 	cvtColor(fuzzyImgLeft, fuzzyEdgesLeft, COLOR_BGR2GRAY);
 	cvtColor(fuzzyImgRight, fuzzyEdgesRight, COLOR_BGR2GRAY);
+	
+	Mat element = getStructuringElement(MORPH_RECT, Size(3, 3), Point(2, 2));
+
+	erode(fuzzyEdgesLeft, fuzzyEdgesLeft, element, Point(-1, -1), 2);
+	erode(fuzzyEdgesRight, fuzzyEdgesRight, element, Point(-1, -1), 1);
+
+	dilate(fuzzyEdgesLeft, fuzzyEdgesLeft, element, Point(-1, -1), 2);
+	dilate(fuzzyEdgesRight, fuzzyEdgesRight, element, Point(-1, -1), 1);
+
 	imshow("left", fuzzyEdgesLeft);
 	imshow("right", fuzzyEdgesRight);
 	fuzzyImgLeft.copyTo(fuzzyImg2(cv::Rect(frameSize.width * 0, frameSize.height / 2, fuzzyImgLeft.cols, fuzzyImgLeft.rows)));
@@ -380,7 +388,7 @@ void laneDetect(Mat& input, Directions& D, Sectors& S) {
 	
 	std::vector<std::vector<Point> > contoursLeft;
 	std::vector<Vec4i> hierarchy;
-	findContours(fuzzyEdgesLeft, contoursLeft, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+	findContours(fuzzyEdgesLeft, contoursLeft, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0));
 	vector<vector<Point> > intersections;
 	for (size_t i = 0; i < contoursLeft.size(); i++)
 	{
@@ -394,7 +402,7 @@ void laneDetect(Mat& input, Directions& D, Sectors& S) {
 	
 	std::vector<std::vector<Point> > contoursRight;
 	std::vector<Vec4i> hierarchy2;
-	findContours(fuzzyEdgesRight, contoursRight, hierarchy2, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+	findContours(fuzzyEdgesRight, contoursRight, hierarchy2, CV_RETR_TREE, CV_CHAIN_APPROX_NONE, Point(0, 0));
 //	vector<vector<Point> > intersections;
 	for (size_t i = 0; i < contoursRight.size(); i++)
 	{
@@ -408,6 +416,7 @@ void laneDetect(Mat& input, Directions& D, Sectors& S) {
 
 	double left = 0;
 	double right = 0;
+	
 	vector<Point> circles = contourBounds(contoursLeft, input, left, right);
 	vector<Point> circles2 = contourBounds(contoursRight, input, left, right);
 	circles.insert(circles.end(),circles2.begin(),circles2.end());
@@ -465,7 +474,18 @@ void laneDetect(Mat& input, Directions& D, Sectors& S) {
 		// Straight Line
 		line(circleImg, Point(input.cols / 2, 0), Point(input.cols / 2, input.rows), Scalar(0, 0, 255), 1);
 	}
-	else {
+	else{
+		/*
+		if (radius < 0){
+			// Ryoma's calc was wrong
+			cout << "Radius error: " << radius << endl;
+
+			// Just turn left since it's NASCAR
+			D.angle = 30;
+			radius = turningRadius(D.angle);
+			radius *= scale;
+		}
+		//*/
 		int centreX = 0;
 		if (D.angle > 75) {
 			centreX = (input.cols / 2) + radius;
@@ -473,7 +493,9 @@ void laneDetect(Mat& input, Directions& D, Sectors& S) {
 		else if (D.angle < 75) {
 			centreX = (input.cols / 2) - radius;
 		}
-		circle(circleImg, Point(centreX, input.rows), radius, Scalar(0, 0, 255), 1);
+		if( radius > 0){
+			circle(circleImg, Point(centreX, input.rows), radius, Scalar(0, 0, 255), 1);
+		}
 	}
 
 	// Add some text to img
@@ -551,7 +573,8 @@ Positive angle = right turn
 double turningAngle(int left, int right) {
 	double result = 0.0;
 	double difference = abs(left - right);
-	double multiplier = 2;
+	double multiplier = 1;
+	double p = 1.0;
 
 	// This new code will take into consideration the cases where there are even weight
 	// distribution on both left and right sides. 
@@ -562,13 +585,15 @@ double turningAngle(int left, int right) {
 	else {
 		if (left > right){
 			// Turn left
-			result = 75 - (difference * multiplier);
-		}
-		else if (right > left){
+			p = (double)left / (left + right);
+			result = 75 - ((45 * p)*0.7);
+		} else if (right > left){
 			// Turn right
-			result = 75 + (difference * multiplier);
+			p = (double)right / (left + right);
+			result = 75 + ((45 * p)*0.7);
 		}
 	}
+	cout << "percent: " << p << endl;
 	cout << "turningAngle(): " << result << endl;
 	result = convertTurningAngle(result);
 	return result;
@@ -786,9 +811,10 @@ vector<Point>  contourBounds(vector<vector<Point> >& contours, Mat& input, doubl
 	// Initialising weights to 0
 	int wa1 = 0, wa2 = 0, wa3 = 0, wa4 = 0, wb1 = 0, wb2 = 0, wb3 = 0, wb4 = 0, wc1 = 0, wc2 = 0, wc3 = 0, wc4 = 0, wd1 = 0, wd2 = 0, wd3 = 0, wd4 = 0;
 
-	int yellowMod = 2;
+	int yellowMod = 1;
+	int blueMod = 2;
 	// Choose weighting scheme
-	int scheme = 1;
+	int scheme = 2;
 	switch (scheme) {
 	case 1:
 		wa1 = 2 * yellowMod;
@@ -807,6 +833,24 @@ vector<Point>  contourBounds(vector<vector<Point> >& contours, Mat& input, doubl
 		wd3 = 4;
 		wd2 = 6;
 		wd1 = 3;
+		break;
+	case 2:
+		wa1 = 0.2 * yellowMod;;	//yellow
+		wa2 = 3 * yellowMod;;	//yellow
+		wa3 = 4 * yellowMod;;	//yellow
+		wa4 = 7* yellowMod;;	//yellow
+		wb4 = 14 * blueMod;	//blue
+		wb3 = 5 * blueMod;	//blue
+		wb2 = 3 * blueMod;	//blue
+		wb1 = 2 * blueMod;	//blue
+		wc1 = 2 * yellowMod;;	//yellow
+		wc2 = 4 * yellowMod;;	//yellow
+		wc3 = 8 * yellowMod;;	//yellow
+		wc4 = 16 * yellowMod;;	//yellow
+		wd4 = 20 * blueMod;	//blue
+		wd3 = 9 * blueMod;	//blue
+		wd2 = 4 * blueMod;	//blue
+		wd1 = 2 * blueMod;	//blue
 		break;
 	default:
 		wa1 = 1;
@@ -845,11 +889,11 @@ vector<Point>  contourBounds(vector<vector<Point> >& contours, Mat& input, doubl
 	Cd4 *= wd4;
 
 	// Average the left/right
-	left += (Ca1 + Ca2 + Ca3 + Ca4 + Cc1 + Cc2 + Cc3 + Cc4) / 8;
-	right += (Cb1 + Cb2 + Cb3 + Cb4 + Cd1 + Cd2 + Cd3 + Cd4) / 8;
+	left += (Ca1 + Ca2 + Ca3 + Ca4 + Cc1 + Cc2 + Cc3 + Cc4);
+	right += (Cb1 + Cb2 + Cb3 + Cb4 + Cd1 + Cd2 + Cd3 + Cd4);
 	cout << left << " " << right << " " << left - right << endl;
 	//	imshow("singleContour", singleContour);
-	cout << Ca1 << " " << Ca2 << " " << Cb1 << " " << Cb2 << " " << Cc1 << " " << Cc2 << " " << Cd1 << " " << Cd2 << " " << endl;
+	//cout << Ca1 << " " << Ca2 << " " << Cb1 << " " << Cb2 << " " << Cc1 << " " << Cc2 << " " << Cd1 << " " << Cd2 << " " << endl;
 
 	return circles;
 }

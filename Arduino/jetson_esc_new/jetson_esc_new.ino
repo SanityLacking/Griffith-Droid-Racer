@@ -24,7 +24,7 @@ void setup()
   steer.attach(10);               // steering
   delay(1);
   steer.write(angle);             // centre at start
-  Serial1.begin(9600);            // bluetooth initialise
+  //Serial1.begin(9600);            // bluetooth initialise
   
   pinMode( 19, INPUT_PULLUP );    // fix Serial1
   pinMode(led, OUTPUT);           // onboard LED
@@ -95,7 +95,7 @@ void processInput(){
   
   //checkcommand();
   steer.write(angle);
-  if (count <=3){
+  if (count <=2){
     esc.write(100);
     count++;
     
@@ -106,6 +106,6 @@ void processInput(){
   }
   
   delay(50);
-  steer.write(angle);     
+ // steer.write(angle);     
 }
 
