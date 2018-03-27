@@ -11,13 +11,12 @@ class Groid {
     int angle = 0, power = 0;
 public:
     Groid();
-    ~Groid();
     void prepareESC();
     void prepareSteering();
     void prepareSerial();
 
-    bool setSteeringAngle(int);
-    bool setPower(int);
+    int setSteeringAngle(int);
+    int setPower(int);
 
     const static int BAUD_RATE = 9600;
     const static int ESC_PIN = 9;

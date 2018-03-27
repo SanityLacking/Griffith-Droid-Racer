@@ -35,7 +35,7 @@ void Groid::prepareSerial()
   delay(10);
 }
 
-bool Groid::setSteeringAngle(int angle)
+int Groid::setSteeringAngle(int angle)
 {
   // Set the angle of steering.
 
@@ -43,14 +43,22 @@ bool Groid::setSteeringAngle(int angle)
 
   this->steer.write(_angle);
   delay(10);
+
+  return angle;
 }
 
-bool Groid::setPower(int power)
+int Groid::setPower(int power)
 {
   // Set the power of steering.
 
-  int _power = power < this->MIN_POWER ? this->MIN_POWER : (power > this->MAX_POWER ? this->MAX_POWER : power);
+  int _power = 0;
+  if(power != 0)
+  {
+    _power = power < this->MIN_POWER ? this->MIN_POWER : (power > this->MAX_POWER ? this->MAX_POWER : power);
+  }
   
   this->esc.write(_power);
   delay(10);
+
+  return _power;
 }

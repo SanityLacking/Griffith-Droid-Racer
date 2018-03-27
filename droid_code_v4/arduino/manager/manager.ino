@@ -33,12 +33,16 @@ void loop()
   if(input.length() > 0)
   {
     int commaIndex = input.indexOf(",");
-    angle = input.substring(0, commaIndex).toInt(); 
+    angle = input.substring(0, commaIndex).toInt();
     power = commaIndex > 0 ? (input.substring(commaIndex + 1).toInt()) : power;
-    
-    Serial.printf("Angle: %3d, power: %3d.", angle, power);
 
-    myGroid.setSteeringAngle(angle);
-    myGroid.setPower(power);
+    int actualAngle = myGroid.setSteeringAngle(angle);
+    int actualPower = myGroid.setPower(power);   
+
+    Serial.print("Angle: ");
+    Serial.print(actualAngle);
+    Serial.print(", power: ");
+    Serial.print(actualPower);
+    Serial.println(".");
   }
 }
