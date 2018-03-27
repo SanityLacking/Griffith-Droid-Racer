@@ -17,6 +17,22 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+#VisualStudioFiles
+*.tlog
+*.lastbuildstate
+*.idb
+*.ipch
+*.vcxproj
+*.vcxproj.filters
+*.sln
+*.sdf
+*.opensdf
+*.props
+*.VC.db
+*.VC.opendb
+*/screenshots/*
+*.obj.enc
+
 # =========================
 # Operating System Files
 # =========================

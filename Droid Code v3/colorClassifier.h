@@ -6,9 +6,12 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/opencv.hpp"
 
+
+
 class ColorClassifier{
 public:
 	ColorClassifier(){
+	
 	
 	};
 	int t_min_contrast_angle, t_max_contrast_angle;
@@ -17,18 +20,20 @@ public:
 	float min_angle, max_angle, min_radius, max_radius;
 	int redContrast, redContrastLevel;
 	int greenContrast, greenContrastLevel;
-	int blueContrast, blueContrastLevel;	
+	int blueContrast, blueContrastLevel;
+	
 private:
 
 };
-// red color: not implemented.
+
+
 class red : public ColorClassifier{
 public:
 	red(){};
+	
 
 };
 
-// blue color detection
 class blue : public ColorClassifier{
 public:
 	blue(){

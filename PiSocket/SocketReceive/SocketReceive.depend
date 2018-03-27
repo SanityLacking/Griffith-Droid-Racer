@@ -1,0 +1,58 @@
+# depslib dependency file v1.0
+1498886138 source:/home/pi/c++/SocketReceive/main.cpp
+	<iostream>
+	<vector>
+	"protocols/basic_protocol.h"
+	"receiver/receiver_socket.h"
+	"util/util.h"
+
+1497447037 /home/pi/c++/SocketReceive/protocols/basic_protocol.h
+	<vector>
+	"protocols/protocol.h"
+	"video/video_frame.h"
+
+1497447037 /home/pi/c++/SocketReceive/receiver/receiver_socket.h
+	<vector>
+
+1497447037 /home/pi/c++/SocketReceive/util/util.h
+	<vector>
+
+1497447037 source:/home/pi/c++/SocketReceive/protocols/basic_protocol.cpp
+	"protocols/basic_protocol.h"
+	<vector>
+
+1497447037 source:/home/pi/c++/SocketReceive/receiver/receiver_socket.cpp
+	"receiver/receiver_socket.h"
+	<arpa/inet.h>
+	<string.h>
+	<sys/socket.h>
+	<iostream>
+	<vector>
+
+1497447037 source:/home/pi/c++/SocketReceive/sender/sender_socket.cpp
+	"sender/sender_socket.h"
+	<arpa/inet.h>
+	<sys/socket.h>
+	<iostream>
+	<string>
+	<vector>
+
+1497447037 source:/home/pi/c++/SocketReceive/util/util.cpp
+	"util/util.h"
+	<iostream>
+	<sstream>
+
+1497447037 source:/home/pi/c++/SocketReceive/video/video_capture.cpp
+	"video/video_capture.h"
+	<iostream>
+	<vector>
+	"opencv2/core/core.hpp"
+	"opencv2/highgui/highgui.hpp"
+
+1497447037 source:/home/pi/c++/SocketReceive/video/video_frame.cpp
+	"video/video_frame.h"
+	<string>
+	<vector>
+	"opencv2/core/core.hpp"
+	"opencv2/highgui/highgui.hpp"
+
