@@ -44,19 +44,19 @@ int Groid::setSteeringAngle(int angle)
   this->steer.write(_angle);
   delay(10);
 
-  return angle;
+  return _angle;
 }
 
 int Groid::setPower(int power)
 {
-  // Set the power of steering.
+  // Set the motor power.
 
   int _power = 0;
   if(power != 0)
   {
     _power = power < this->MIN_POWER ? this->MIN_POWER : (power > this->MAX_POWER ? this->MAX_POWER : power);
   }
-  
+
   this->esc.write(_power);
   delay(10);
 

@@ -20,7 +20,7 @@ Natural numbers only. Otherwise, go nuts: stress test it.
 | `ESC_PIN`   | 9 |
 | `STEER_PIN` | 10 |
 | `MIN_ANGLE` | 30 |
-| `MAX_ANGLE` | 75 |
+| `MAX_ANGLE` | 130 |
 | `MIN_POWER` | 100 |
 | `MAX_POWER` | 130 |
 
