@@ -34,19 +34,19 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /home/matthewlee/Programs/clion-2018.1/bin/cmake/bin/cmake
+CMAKE_COMMAND = /home/matthewlee/Downloads/clion-2018.1/bin/cmake/bin/cmake
 
 # The command to remove a file.
-RM = /home/matthewlee/Programs/clion-2018.1/bin/cmake/bin/cmake -E remove -f
+RM = /home/matthewlee/Downloads/clion-2018.1/bin/cmake/bin/cmake -E remove -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /media/matthewlee/Storage/Projects/droid_racer
+CMAKE_SOURCE_DIR = "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /media/matthewlee/Storage/Projects/droid_racer/cmake-build-debug
+CMAKE_BINARY_DIR = "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/cmake-build-debug"
 
 # Include any dependencies generated for this target.
 include CMakeFiles/droid_racer.dir/depend.make
@@ -59,16 +59,16 @@ include CMakeFiles/droid_racer.dir/flags.make
 
 CMakeFiles/droid_racer.dir/main.cpp.o: CMakeFiles/droid_racer.dir/flags.make
 CMakeFiles/droid_racer.dir/main.cpp.o: ../main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/matthewlee/Storage/Projects/droid_racer/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/droid_racer.dir/main.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/droid_racer.dir/main.cpp.o -c /media/matthewlee/Storage/Projects/droid_racer/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/cmake-build-debug/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/droid_racer.dir/main.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/droid_racer.dir/main.cpp.o -c "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/main.cpp"
 
 CMakeFiles/droid_racer.dir/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/droid_racer.dir/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/matthewlee/Storage/Projects/droid_racer/main.cpp > CMakeFiles/droid_racer.dir/main.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/main.cpp" > CMakeFiles/droid_racer.dir/main.cpp.i
 
 CMakeFiles/droid_racer.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/droid_racer.dir/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/matthewlee/Storage/Projects/droid_racer/main.cpp -o CMakeFiles/droid_racer.dir/main.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/main.cpp" -o CMakeFiles/droid_racer.dir/main.cpp.s
 
 CMakeFiles/droid_racer.dir/main.cpp.o.requires:
 
@@ -83,16 +83,16 @@ CMakeFiles/droid_racer.dir/main.cpp.o.provides.build: CMakeFiles/droid_racer.dir
 
 CMakeFiles/droid_racer.dir/droid/EngineController.cpp.o: CMakeFiles/droid_racer.dir/flags.make
 CMakeFiles/droid_racer.dir/droid/EngineController.cpp.o: ../droid/EngineController.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/matthewlee/Storage/Projects/droid_racer/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/droid_racer.dir/droid/EngineController.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/droid_racer.dir/droid/EngineController.cpp.o -c /media/matthewlee/Storage/Projects/droid_racer/droid/EngineController.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/cmake-build-debug/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/droid_racer.dir/droid/EngineController.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/droid_racer.dir/droid/EngineController.cpp.o -c "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/droid/EngineController.cpp"
 
 CMakeFiles/droid_racer.dir/droid/EngineController.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/droid_racer.dir/droid/EngineController.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/matthewlee/Storage/Projects/droid_racer/droid/EngineController.cpp > CMakeFiles/droid_racer.dir/droid/EngineController.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/droid/EngineController.cpp" > CMakeFiles/droid_racer.dir/droid/EngineController.cpp.i
 
 CMakeFiles/droid_racer.dir/droid/EngineController.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/droid_racer.dir/droid/EngineController.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/matthewlee/Storage/Projects/droid_racer/droid/EngineController.cpp -o CMakeFiles/droid_racer.dir/droid/EngineController.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/droid/EngineController.cpp" -o CMakeFiles/droid_racer.dir/droid/EngineController.cpp.s
 
 CMakeFiles/droid_racer.dir/droid/EngineController.cpp.o.requires:
 
@@ -107,16 +107,16 @@ CMakeFiles/droid_racer.dir/droid/EngineController.cpp.o.provides.build: CMakeFil
 
 CMakeFiles/droid_racer.dir/droid/ArduinoController.cpp.o: CMakeFiles/droid_racer.dir/flags.make
 CMakeFiles/droid_racer.dir/droid/ArduinoController.cpp.o: ../droid/ArduinoController.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/matthewlee/Storage/Projects/droid_racer/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/droid_racer.dir/droid/ArduinoController.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/droid_racer.dir/droid/ArduinoController.cpp.o -c /media/matthewlee/Storage/Projects/droid_racer/droid/ArduinoController.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/cmake-build-debug/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/droid_racer.dir/droid/ArduinoController.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/droid_racer.dir/droid/ArduinoController.cpp.o -c "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/droid/ArduinoController.cpp"
 
 CMakeFiles/droid_racer.dir/droid/ArduinoController.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/droid_racer.dir/droid/ArduinoController.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/matthewlee/Storage/Projects/droid_racer/droid/ArduinoController.cpp > CMakeFiles/droid_racer.dir/droid/ArduinoController.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/droid/ArduinoController.cpp" > CMakeFiles/droid_racer.dir/droid/ArduinoController.cpp.i
 
 CMakeFiles/droid_racer.dir/droid/ArduinoController.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/droid_racer.dir/droid/ArduinoController.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/matthewlee/Storage/Projects/droid_racer/droid/ArduinoController.cpp -o CMakeFiles/droid_racer.dir/droid/ArduinoController.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/droid/ArduinoController.cpp" -o CMakeFiles/droid_racer.dir/droid/ArduinoController.cpp.s
 
 CMakeFiles/droid_racer.dir/droid/ArduinoController.cpp.o.requires:
 
@@ -131,16 +131,16 @@ CMakeFiles/droid_racer.dir/droid/ArduinoController.cpp.o.provides.build: CMakeFi
 
 CMakeFiles/droid_racer.dir/droid/server.cpp.o: CMakeFiles/droid_racer.dir/flags.make
 CMakeFiles/droid_racer.dir/droid/server.cpp.o: ../droid/server.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/media/matthewlee/Storage/Projects/droid_racer/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/droid_racer.dir/droid/server.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/droid_racer.dir/droid/server.cpp.o -c /media/matthewlee/Storage/Projects/droid_racer/droid/server.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir="/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/cmake-build-debug/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/droid_racer.dir/droid/server.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/droid_racer.dir/droid/server.cpp.o -c "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/droid/server.cpp"
 
 CMakeFiles/droid_racer.dir/droid/server.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/droid_racer.dir/droid/server.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /media/matthewlee/Storage/Projects/droid_racer/droid/server.cpp > CMakeFiles/droid_racer.dir/droid/server.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/droid/server.cpp" > CMakeFiles/droid_racer.dir/droid/server.cpp.i
 
 CMakeFiles/droid_racer.dir/droid/server.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/droid_racer.dir/droid/server.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /media/matthewlee/Storage/Projects/droid_racer/droid/server.cpp -o CMakeFiles/droid_racer.dir/droid/server.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/droid/server.cpp" -o CMakeFiles/droid_racer.dir/droid/server.cpp.s
 
 CMakeFiles/droid_racer.dir/droid/server.cpp.o.requires:
 
@@ -169,7 +169,7 @@ droid_racer: CMakeFiles/droid_racer.dir/droid/ArduinoController.cpp.o
 droid_racer: CMakeFiles/droid_racer.dir/droid/server.cpp.o
 droid_racer: CMakeFiles/droid_racer.dir/build.make
 droid_racer: CMakeFiles/droid_racer.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/media/matthewlee/Storage/Projects/droid_racer/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable droid_racer"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir="/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/cmake-build-debug/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable droid_racer"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/droid_racer.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -189,6 +189,6 @@ CMakeFiles/droid_racer.dir/clean:
 .PHONY : CMakeFiles/droid_racer.dir/clean
 
 CMakeFiles/droid_racer.dir/depend:
-	cd /media/matthewlee/Storage/Projects/droid_racer/cmake-build-debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /media/matthewlee/Storage/Projects/droid_racer /media/matthewlee/Storage/Projects/droid_racer /media/matthewlee/Storage/Projects/droid_racer/cmake-build-debug /media/matthewlee/Storage/Projects/droid_racer/cmake-build-debug /media/matthewlee/Storage/Projects/droid_racer/cmake-build-debug/CMakeFiles/droid_racer.dir/DependInfo.cmake --color=$(COLOR)
+	cd "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/cmake-build-debug" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4" "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4" "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/cmake-build-debug" "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/cmake-build-debug" "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/cmake-build-debug/CMakeFiles/droid_racer.dir/DependInfo.cmake" --color=$(COLOR)
 .PHONY : CMakeFiles/droid_racer.dir/depend
 

@@ -9,16 +9,22 @@
 
 
 class EngineController {
+protected:
+    int MAXANGLE = 120;
+    int MINANGLE = 20;
+    int MAXTHROTTLE = 100;
+    int MINTHROTTLE = 40;
 private:
-    float steeringAngle = 0.0;
-    float throttle = 0.0;
-
+    int steeringAngle = 0.0;
+    int throttle = 0.0;
+    void updateInstructions();
 public:
-    float setSteeringAngle(float steeringAngle);
-    float setThrottle(float throttle);
-    float getSteeringAngle();
-    float getThrottle();
-    virtual bool step(float steeringAngle, float throttle);
+    char instructions [10];
+    int setSteeringAngle(int steeringAngle);
+    int setThrottle(int throttle);
+    int getSteeringAngle();
+    int getThrottle();
+    virtual bool update(int steeringAngle, int throttle);
 };
 
 

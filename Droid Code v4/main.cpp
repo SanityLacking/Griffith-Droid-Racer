@@ -1,17 +1,14 @@
-//=========================================
-// Created by Matthew Lee on 8/04/18.
-//=========================================
 #include <iostream>
-#include <stdio.h>
-#include "EngineController.h"
+#include <string.h>
+#include <zconf.h>
+#include <EngineController.h>
+#include <ArduinoController.h>
 
 using namespace std;
 
-int main(){
-    EngineController ctrl;
-    ctrl.setSteeringAngle(0.5);
-    ctrl.setThrottle(1);
-    cout << ctrl.getSteeringAngle() << endl;
-    cout << ctrl.getThrottle() << endl;
+
+int main() {
+    ArduinoController ctrl("/dev/ttyACM1");
+    ctrl.step(20, 100);
     return 0;
 }

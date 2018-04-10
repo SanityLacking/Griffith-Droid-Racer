@@ -10,6 +10,7 @@ CMakeFiles/droid_racer.dir/droid/EngineController.cpp.o: ../droid/EngineControll
 
 CMakeFiles/droid_racer.dir/droid/server.cpp.o: ../droid/server.cpp
 
+CMakeFiles/droid_racer.dir/main.cpp.o: .././droid/ArduinoController.h
 CMakeFiles/droid_racer.dir/main.cpp.o: .././droid/EngineController.h
 CMakeFiles/droid_racer.dir/main.cpp.o: ../main.cpp
 

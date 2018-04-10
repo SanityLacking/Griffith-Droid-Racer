@@ -1,4 +1,4 @@
-# Install script for directory: /media/matthewlee/Storage/Projects/droid_racer
+# Install script for directory: /media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/media/matthewlee/Storage/Projects/droid_racer/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

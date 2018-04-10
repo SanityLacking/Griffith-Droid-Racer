@@ -6,5 +6,5 @@ CXX_FLAGS = -g   -std=gnu++11
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/media/matthewlee/Storage/Projects/droid_racer/./droid -I/media/matthewlee/Storage/Projects/droid_racer/./client -I/media/matthewlee/Storage/Projects/droid_racer/./res 
+CXX_INCLUDES = -I"/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/./droid" -I"/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/./client" -I"/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/./res" 
 

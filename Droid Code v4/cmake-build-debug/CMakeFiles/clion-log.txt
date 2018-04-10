@@ -1,4 +1,8 @@
-/home/matthewlee/Programs/clion-2018.1/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /media/matthewlee/Storage/Projects/droid_racer
+/home/matthewlee/Downloads/clion-2018.1/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" "/media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4"
 -- Configuring done
+CMake Error at CMakeLists.txt:24 (add_executable):
+  CXX_STANDARD is set to invalid value '11;--std=c++14'
+
+
 -- Generating done
--- Build files have been written to: /media/matthewlee/Storage/Projects/droid_racer/cmake-build-debug
+-- Build files have been written to: /media/matthewlee/DATA/projects/droid_racer_2018/Droid Code v4/cmake-build-debug

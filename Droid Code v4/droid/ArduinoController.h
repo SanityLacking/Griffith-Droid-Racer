@@ -5,10 +5,21 @@
 #ifndef DROID_RACER_ARDUINOCONTROLLER_H
 #define DROID_RACER_ARDUINOCONTROLLER_H
 
+#include <cstring>
 #include "EngineController.h"
 
+
 class ArduinoController : public EngineController{
-    // TODO: Create interaction functions to the Arduino engine
+    /**
+     *  This class controls the connection to the Arduino device and extends
+     *  the engine controller class
+     */
+private:
+    const char * port;
+    FILE * arduino;
+public:
+    ArduinoController(const char * port);
+    bool step(int steeringAngle, int throttle);
 };
 
 

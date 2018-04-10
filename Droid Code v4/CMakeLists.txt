@@ -21,5 +21,4 @@ set (
             ${DROID_DIR}/ArduinoController.cpp
             ${DROID_DIR}/server.cpp
 )
-
 add_executable(droid_racer ${SOURCE_FILES})

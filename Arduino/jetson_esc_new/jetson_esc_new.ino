@@ -53,7 +53,9 @@ void loop()
   processInput();
 }
 void usbSerial() {
+  
   String inputStr;
+  
   if (Serial.available() > 0)  {
     inputStr = "";
   }
@@ -67,21 +69,7 @@ void usbSerial() {
     }
     delay(10);
   }
-  if(inputStr.length() > 0){
-    int commaIndex = inputStr.indexOf(",");      
-    String firstValue = inputStr.substring(0, commaIndex);      
-    angle = firstValue.toInt();
-    String secondValue = String(power);
-    if(commaIndex > 0){
-      secondValue = inputStr.substring(commaIndex+1); // To the end of the string      
-      power = secondValue.toInt();
-    }
-    
-    String outStr;
-    outStr += firstValue +","+ secondValue;
-    Serial.println(outStr);
-    
-  }  
+  Serial.print(inputStr);
 }
 
 void processInput(){
