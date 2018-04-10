@@ -1,0 +1,4 @@
+/home/matthewlee/Programs/clion-2018.1/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release -G "CodeBlocks - Unix Makefiles" /media/matthewlee/Storage/Projects/droid_racer
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /media/matthewlee/Storage/Projects/droid_racer/cmake-build-release

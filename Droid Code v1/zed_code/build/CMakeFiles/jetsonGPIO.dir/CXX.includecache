@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/jetsonGPIO.h
+
+/home/ubuntu/Desktop/testfiles/zed_code/src/jetsonGPIO.cpp
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+errno.h
+-
+unistd.h
+-
+fcntl.h
+-
+poll.h
+-
+jetsonGPIO.h
+/home/ubuntu/Desktop/testfiles/zed_code/src/jetsonGPIO.h
+

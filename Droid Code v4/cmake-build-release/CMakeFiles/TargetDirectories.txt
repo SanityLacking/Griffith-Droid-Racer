@@ -1,0 +1,3 @@
+/media/matthewlee/Storage/Projects/droid_racer/cmake-build-release/CMakeFiles/rebuild_cache.dir
+/media/matthewlee/Storage/Projects/droid_racer/cmake-build-release/CMakeFiles/edit_cache.dir
+/media/matthewlee/Storage/Projects/droid_racer/cmake-build-release/CMakeFiles/droid_racer.dir

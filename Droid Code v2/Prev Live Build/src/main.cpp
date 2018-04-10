@@ -1,0 +1,157 @@
+
+//test
+
+//standard include
+#include <stdio.h>
+#include <string.h>
+#include <chrono>
+
+#include <iostream>
+//ZED include
+
+//OpenCV include
+#include "opencv2/core/core.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+
+//additional files
+#include "fuzzyColor.h"
+
+
+using namespace cv;
+using namespace std;
+
+
+int setupDroid();
+int receiveInput();
+int processInput();
+//int decisionProcess(vector<Point> objects);
+//int statusCheck();
+void emitDirections();
+int controlLoop(VideoCapture& camera);
+void test();
+int pAngle, pSpeed;
+void findMidPoint(Point laneL, Point laneR, Point& midPoint,Point& lastMidPoint);
+//globals
+Point lastPointL(0,0), lastPointR(0,0);
+Point midPoint(700,550), midPoint1(700,550), midPoint2(700,550), midPoint3(700,550);
+Point lastMidPoint(700,550), lastMidPoint1(700,550), lastMidPoint2(700,550), lastMidPoint3(700,550);
+
+Scalar midPointColor =(0,255,0);
+int offsetL = 100, offsetR = 100;
+int tolerance = 100;
+int lastDirection=0;
+int currentDirection=1;
+int dcount=0;
+int counter = 0;
+int laneCounter =0;
+
+char key = ' ';
+    
+
+//main Loop
+
+int setupDroid(){
+	//cout << cv::getBuildInformation() <<endl;
+	return 1;	
+}
+
+int main(int argc, char **argv) {  		
+	cout << "program start" <<endl;
+	//setup
+	setupDroid();
+	//controlLoop
+	
+	
+	VideoCapture cap;
+	if (!cap.open(0)){
+		cout << "Camera Is not able to be Opened, is it connected?" << endl;
+		return 0;
+		cin.ignore();
+	}	
+	controlLoop(cap);
+	
+}
+
+int controlLoop(VideoCapture& camera){
+	bool run = true;	
+	int capWidth, capHeight;
+	
+	FuzzyColor fuzzyColor;
+	
+	//midPoint = Point(zg->width/2 - 50 ,zg->height/2 - 100);
+	while(run){		
+		//get new frame
+		Mat frame;
+		camera >> frame;
+		
+		
+		//preprocessing
+		Mat newFrame(frame, Rect(0,0,frame.cols/2,frame.rows));
+		
+		
+		// run color detection
+		fuzzyColor.processFuzzyColor(newFrame);
+		
+		
+		// run lane detection
+		
+		
+		//call fuzzy logic system 
+		
+		
+		
+		//output to arduino
+		
+		
+		//midPoint = Point((midPoint1.x+midPoint2.x+midPoint3.x)/3,550);		
+	/*			
+		if (midPoint.x < zg->width/2 - tolerance){
+			//			turn left		
+			currentDirection = 3;
+			midPointColor = (0,0,200);
+		}else if (midPoint.x > zg->width/2 + tolerance){
+			//			turn right		
+			currentDirection = 4;
+			midPointColor = (255,0,0);
+		}else{
+			//			turn foward
+			currentDirection = 1;
+			midPointColor = (0,255,0);
+		}
+	*/	
+		
+		
+	/*	
+		circle(colorImg, midPoint, 8, midPointColor,8);		
+        line(colorImg, Point(zg->width/2 - tolerance,0),Point (zg->width/2 - tolerance,zg->height), Scalar(0,0,0),2);
+        line(colorImg, Point(zg->width/2 + tolerance,0),Point (zg->width/2 + tolerance,zg->height), Scalar(0,0,0),2);
+        line(colorImg, Point(zg->width/2, 0),Point (zg->width/2,zg->height), Scalar(0,0,0),2);
+      */ 
+       
+		
+		//emitDirections();
+		//lastMidPoint = midPoint;
+
+		cv::imshow("Color", newFrame);   		
+	
+		
+
+        key = cv::waitKey(20);
+        switch (key)// handle the pressed key
+        {
+            case 'q': // close the program
+            case 'Q':
+                run = false;
+              
+                break;
+            default:
+                break;
+        }      
+    }	
+		
+				
+	return 0;
+}
+
+

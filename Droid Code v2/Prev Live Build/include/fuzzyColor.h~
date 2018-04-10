@@ -1,0 +1,55 @@
+#ifndef FUZZYCOLOR_H
+#define FUZZYCOLOR_H
+
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/opencv.hpp"
+
+#include "colorClassifier.h"
+
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+
+using namespace std;
+using namespace cv;
+
+class FuzzyColor{
+
+public:
+	FuzzyColor();
+
+	void processFuzzyColor(Mat& frame);
+	
+private:
+
+	void multi_colourClassify_rg_3(float min_angle, float max_angle, float min_radius, float max_radius,
+                       float min_contrast_angle, float max_contrast_angle,
+                       int RedContrast, int RedContrastLevel,
+                       int GreenContrast, int GreenContrastLevel,
+                       int BlueContrast, int BlueContrastLevel,
+
+                       float min_angle2, float max_angle2, float min_radius2, float max_radius2,
+                       float min_contrast_angle2, float max_contrast_angle2,
+                       int RedContrast2, int RedContrastLevel2,
+                       int GreenContrast2, int GreenContrastLevel2,
+                       int BlueContrast2, int BlueContrastLevel2,
+
+                       float min_angle3, float max_angle3, float min_radius3, float max_radius3,
+                       float min_contrast_angle3, float max_contrast_angle3,
+                       int RedContrast3, int RedContrastLevel3,
+                       int GreenContrast3, int GreenContrastLevel3,
+                       int BlueContrast3, int BlueContrastLevel3, 
+
+                       Mat &sourceImg, Mat &destImg);
+	void laneDetection();
+
+	 float GetAngle(float ChR, float ChG);
+	 int FuzzyEnhanceX(int x, float Threshold, short N);
+	 int FuzzyDegradeX(int x, float Threshold, short N);
+	void intersection(Point midPoint, int offset, Mat& img, Point& returnLP, Point& returnRP);
+};
+
+
+
+#endif

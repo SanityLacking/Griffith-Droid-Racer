@@ -1,0 +1,24 @@
+#ifndef FUZZYCOLOR_H
+#define FUZZYCOLOR_H
+
+
+
+class fuzzyColor{
+
+public:
+	fuzzyColor();
+
+	void processFuzzyColor(Mat& frame);
+	
+	
+
+private:
+
+	void 	multi_colourClassify_rg_3
+
+}
+
+
+
+
+#endif
