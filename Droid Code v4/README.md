@@ -46,5 +46,5 @@ In order to perform machine learning the following steps are required:
 - Cailen Robertson
 - Ryoma Ohira
 - Matthew Bourgeois
-- Aiden Mcmillan
+- Aidan Mcmillan
 - Matthew Lee
