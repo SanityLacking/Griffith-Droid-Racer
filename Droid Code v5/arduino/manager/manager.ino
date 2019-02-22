@@ -9,6 +9,9 @@ char command;
 
 void setup()
 {
+  myGroid.prepareESC();
+  myGroid.prepareSteering();
+  myGroid.prepareSerial();
   Serial.print("Program Start\n");
 }
 
@@ -46,3 +49,4 @@ void loop()
     Serial.println(".");
   }
 }
+

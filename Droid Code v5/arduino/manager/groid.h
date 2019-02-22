@@ -10,7 +10,6 @@ class Groid {
     Servo esc, steer;
     int angle = 0, power = 0;
 public:
-    Groid();
     void prepareESC();
     void prepareSteering();
     void prepareSerial();
@@ -29,3 +28,4 @@ public:
 };
 
 #endif
+

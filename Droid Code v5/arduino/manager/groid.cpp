@@ -4,13 +4,6 @@
 #include <Arduino.h>
 #include "groid.h"
 
-Groid::Groid()
-{
-  this->prepareESC();
-  this->prepareSteering();
-  this->prepareSerial();
-}
-
 void Groid::prepareESC()
 {
   // Prepare the connection to the ESC.
@@ -22,7 +15,7 @@ void Groid::prepareESC()
 void Groid::prepareSteering()
 {
   // Prepare the connection to the steering mechanism.
-
+  
   this->steer.attach(this->STEER_PIN);
   delay(10);
 }
@@ -72,3 +65,4 @@ int Groid::setPower(int power)
 
   return power;
 }
+
