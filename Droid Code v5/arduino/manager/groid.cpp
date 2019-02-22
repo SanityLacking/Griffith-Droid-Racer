@@ -51,13 +51,16 @@ int Groid::setPower(int power)
 {
   // Set the motor power.
 
-  if(power < this->MIN_POWER)
+  if(power != this->NO_POWER)
   {
-    power = this->MIN_POWER;
-  }
-  else if(power > this->MAX_POWER)
-  {
-    power = this->MAX_POWER;
+    if(power <= this->MIN_POWER)
+    {
+      power = this->MIN_POWER;
+    }
+    else if(power > this->MAX_POWER)
+    {
+      power = this->MAX_POWER;
+    }
   }
 
   this->esc.write(power);

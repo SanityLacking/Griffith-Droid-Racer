@@ -23,6 +23,7 @@ public:
     const static int MIN_ANGLE = 30;
     const static int MID_ANGLE = 75;
     const static int MAX_ANGLE = 130;
+    const static int NO_POWER = 0;
     const static int MIN_POWER = 100;
     const static int MAX_POWER = 130;
 };
